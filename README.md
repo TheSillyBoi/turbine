@@ -4,14 +4,16 @@ Custom CPU Architecture and emulator for that architecture made for fun!
 
 ## Details
 
-- 8-bit processor
+- 16-bit processor
+- 0xfff bytes of memory
+- Little-endian
 
 ## Registers
 
 - `ra` - General Purpose Register
 - `rsp` - Stack Pointer
 - `rbp` - Base Pointer
-- `rpc` - Program Counter
+- `rpc` - Instruction Pointer
 - `rfl` - Flags Register
 
 ## Memory
@@ -20,8 +22,7 @@ Custom CPU Architecture and emulator for that architecture made for fun!
 
 - `0x0000 - 0x0400` - ROM(TEXT)
 - `0x0401 - 0x0800` - ROM(DATA)
-- `0x0801 - 0x1000` - STACK
-- `0x1001 - 0xFFFF` - RAM
+- `0x0801 - 0xFFFF` - RAM
 
 ## Instructions
 
