@@ -5,35 +5,35 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <string.h>
+#include <stdlib.h>
 
 VirtualMachine init_vm() {
-  uint8_t memory[MEMORY_SIZE];
-
-  memset(memory, 0x0, MEMORY_SIZE);
+  uint8_t *memory = malloc(sizeof(uint8_t) + MEMORY_SIZE);
 
   VirtualMachine vm = {0};
   vm.base_pointer = RAM_END;
   vm.stack_pointer = RAM_END;
   vm.general_register = 0x0;
-  memset(vm.memory, 0, MEMORY_SIZE);
   vm.instruction_pointer = 0x0;
   vm.flags_register = 0x0;
+  vm.memory = memory;
 
   return vm;
 }
 
+void delete_vm(VirtualMachine *vm) { free(vm->memory); }
+
 void init_text(VirtualMachine *vm, uint8_t *text, uint16_t size) {
-  assert(size > ROM_TEXT_END - ROM_TEXT_START + 1);
-  for (int i = ROM_TEXT_START; i < size; i++) {
-    vm->memory[i] = text[i];
+  assert(size < ROM_TEXT_END - ROM_TEXT_START + 1);
+  for (int i = 0; i < size; i++) {
+    vm->memory[ROM_DATA_START + i] = text[i];
   }
 }
 
 void init_data(VirtualMachine *vm, uint8_t *data, uint16_t size) {
-  assert(size > ROM_DATA_END - ROM_DATA_START + 1);
-  for (int i = ROM_DATA_START; i < size; i++) {
-    vm->memory[i] = data[i];
+  assert(size < ROM_DATA_END - ROM_DATA_START + 1);
+  for (int i = 0; i < size; i++) {
+    vm->memory[ROM_DATA_START + i] = data[i];
   }
 }
 
@@ -190,32 +190,38 @@ void step(VirtualMachine *vm) {
     uint8_t flag = vm->memory[vm->instruction_pointer++];
     switch (flag) {
     case 0x0: {
-      vm->general_register = vm->memory[vm->stack_pointer++];
+      vm->general_register = vm->memory[vm->stack_pointer];
+      vm->stack_pointer += 1;
       break;
     }
     case 0x1: {
-      vm->general_register = u16_combine(vm->memory[vm->stack_pointer++],
-                                         vm->memory[vm->stack_pointer++]);
+      vm->general_register = u16_combine(vm->memory[vm->stack_pointer],
+                                         vm->memory[vm->stack_pointer + 1]);
+      vm->stack_pointer += 2;
       break;
     }
     case 0x2: {
-      vm->stack_pointer = u16_combine(vm->memory[vm->stack_pointer++],
-                                      vm->memory[vm->stack_pointer++]);
+      vm->stack_pointer = u16_combine(vm->memory[vm->stack_pointer],
+                                      vm->memory[vm->stack_pointer + 1]);
       break;
     }
     case 0x3: {
-      vm->base_pointer = u16_combine(vm->memory[vm->stack_pointer++],
-                                     vm->memory[vm->stack_pointer++]);
+      vm->base_pointer = u16_combine(vm->memory[vm->stack_pointer],
+                                     vm->memory[vm->stack_pointer + 1]);
+      vm->stack_pointer += 2;
       break;
     }
     case 0x4: {
-      vm->instruction_pointer = u16_combine(vm->memory[vm->stack_pointer++],
-                                            vm->memory[vm->stack_pointer++]);
+      vm->instruction_pointer = u16_combine(vm->memory[vm->stack_pointer],
+                                            vm->memory[vm->stack_pointer + 1]);
+
+      vm->stack_pointer += 2;
       break;
     }
     case 0x5: {
-      vm->flags_register = u16_combine(vm->memory[vm->stack_pointer++],
-                                       vm->memory[vm->stack_pointer++]);
+      vm->flags_register = u16_combine(vm->memory[vm->stack_pointer],
+                                       vm->memory[vm->stack_pointer + 1]);
+      vm->stack_pointer += 2;
       break;
     }
     }

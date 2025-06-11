@@ -49,7 +49,9 @@ to data in register and write to register
  from data in register and write to register.
 - 8: `SBB [mem addr]` - Subtract data from given memory address
 from data in register and write to register.
-- 9: `CMP [mem addr]` - Compare data from memory and checks if register data is greater than, less than, or equal to data from register. Dumps result to flags register.
+- 9: `CMP [mem addr]` - Compare data from memory and checks
+if register data is greater than, less than, or equal to data from register.
+Dumps result to flags register.
 - A: `JNZ [mem addr]` - Jumps the instruction pointer to the
 given memory address if register is not zero
 - B: `AND [mem addr]` - Logical AND with register and given memory address
