@@ -26,7 +26,7 @@ void delete_vm(VirtualMachine *vm) { free(vm->memory); }
 void init_text(VirtualMachine *vm, uint8_t *text, uint16_t size) {
   assert(size < ROM_TEXT_END - ROM_TEXT_START + 1);
   for (int i = 0; i < size; i++) {
-    vm->memory[ROM_DATA_START + i] = text[i];
+    vm->memory[ROM_TEXT_START + i] = text[i];
   }
 }
 
@@ -44,7 +44,9 @@ void step(VirtualMachine *vm) {
   switch (vm->memory[vm->instruction_pointer++]) {
   case LOAD: {
     uint8_t flag = vm->memory[vm->instruction_pointer++];
-    uint8_t data = deref_indirect(vm->instruction_pointer++, vm, 0);
+    uint8_t left = vm->memory[vm->instruction_pointer++];
+    uint8_t right = vm->memory[vm->instruction_pointer++];
+    uint16_t data = u16_combine(left, right);
     switch (flag) {
     case 0x0: {
       vm->general_register = vm->memory[data];

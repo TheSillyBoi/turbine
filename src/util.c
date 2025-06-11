@@ -1,10 +1,8 @@
 #include "util.h"
 #include <stdint.h>
-#include <stdio.h>
 
 void u16_split(uint16_t value, uint8_t *left, uint8_t *right) {
-  *left = 0;
-  printf("%d", *left);
+  *left = value;
   *right = (uint8_t)(value >> 8);
 }
 
