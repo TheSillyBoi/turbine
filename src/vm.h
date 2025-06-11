@@ -9,9 +9,9 @@
 #define ROM_DATA_START 0x401
 #define ROM_DATA_END 0x800
 #define RAM_START 0x801
-#define RAM_END 0xFFFF
+#define RAM_END 0xFFFE
 
-typedef struct {
+typedef struct VirtualMachine {
   uint16_t general_register;
   uint16_t stack_pointer;
   uint16_t base_pointer;
@@ -24,5 +24,6 @@ VirtualMachine init_vm();
 void init_text(VirtualMachine *vm, uint8_t *text, uint16_t size);
 void init_data(VirtualMachine *vm, uint8_t *data, uint16_t size);
 void step(VirtualMachine *vm);
+uint8_t deref_indirect(uint8_t reg, VirtualMachine *vm, uint8_t shift);
 
 #endif // INCLUDE_SRC_VM_H_

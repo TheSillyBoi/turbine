@@ -1,6 +1,9 @@
 #include "vm.h"
+#include "instructions.h"
+#include "util.h"
 #include <assert.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 VirtualMachine init_vm() {
@@ -8,13 +11,13 @@ VirtualMachine init_vm() {
 
   memset(memory, 0x0, MEMORY_SIZE);
 
-  const VirtualMachine vm = {.general_register = 0,
-                             // stack moves backwards
-                             .stack_pointer = RAM_END,
-                             .base_pointer = RAM_END,
-                             .flags_register = 0,
-                             .instruction_pointer = ROM_TEXT_START,
-                             .memory = memory};
+  VirtualMachine vm = {0};
+  vm.base_pointer.word = RAM_END;
+  vm.stack_pointer.word = RAM_END;
+  vm.general_register.word = 0x0;
+  memset(vm.memory, 0, MEMORY_SIZE);
+  vm.instruction_pointer.word = 0x0;
+  vm.flags_register = 0x0;
 
   return vm;
 }
@@ -33,4 +36,93 @@ void init_data(VirtualMachine *vm, uint8_t *data, uint16_t size) {
   }
 }
 
-void step(VirtualMachine *vm) {}
+void step(VirtualMachine *vm) {
+  if (vm->instruction_pointer >= MEMORY_SIZE) {
+    printf("[vm] PROGRAM END\n");
+  }
+  switch (vm->memory[vm->instruction_pointer++]) {
+  case LOAD: {
+    uint8_t flag = deref_indirect(vm->instruction_pointer++, vm, 0);
+    uint8_t mem_addr = deref_indirect(vm->instruction_pointer++, vm, 0);
+    switch (flag) {
+    case 0x0: {
+      vm->general_register = vm->memory[mem_addr];
+      break;
+    }
+    case 0x1: {
+      vm->general_register =
+          u16_combine(vm->memory[mem_addr], vm->memory[mem_addr + 1]);
+      break;
+    }
+    case 0x2: {
+      vm->stack_pointer =
+          u16_combine(vm->memory[mem_addr], vm->memory[mem_addr + 1]);
+      break;
+    }
+    case 0x3: {
+      vm->base_pointer =
+          u16_combine(vm->memory[mem_addr], vm->memory[mem_addr + 1]);
+      break;
+    }
+    }
+    break;
+  }
+  case DUMP: {
+    uint8_t flag = deref_indirect(vm->instruction_pointer++, vm, 0);
+    uint8_t mem_addr = deref_indirect(vm->instruction_pointer++, vm, 0);
+    break;
+  }
+  case LDA: {
+    uint8_t flag = deref_indirect(vm->instruction_pointer++, vm, 0);
+    uint8_t mem_addr = deref_indirect(vm->instruction_pointer++, vm, 0);
+    break;
+  }
+  case PUSH: {
+    uint8_t flag = deref_indirect(vm->instruction_pointer++, vm, 0);
+    uint8_t mem_addr = deref_indirect(vm->instruction_pointer++, vm, 0);
+    break;
+  }
+  case POP: {
+    break;
+  }
+  case ADC: {
+    break;
+  }
+  case ADD: {
+    break;
+  }
+  case SUB: {
+    break;
+  }
+  case SBB: {
+    break;
+  }
+  case CMP: {
+    break;
+  }
+  case JNZ: {
+    break;
+  }
+  case AND: {
+    break;
+  }
+  case NOT: {
+    break;
+  }
+  case OR: {
+    break;
+  }
+  case IN: {
+    break;
+  }
+  case OUT: {
+    break;
+  }
+  }
+}
+
+// Will most likely be used for instruction ptr as that often points to
+// instructions which point to another instruction
+uint8_t deref_indirect(uint8_t reg, VirtualMachine *vm, uint8_t shift) {
+  return vm->memory[vm->memory[reg] + shift];
+}

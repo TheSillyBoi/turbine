@@ -18,6 +18,9 @@ enum Instructions {
   OR = 0xD,
   IN = 0xE,
   OUT = 0xF,
+  // due to very limited space for instructions, the halt instruction will
+  // basically just be jumping to a memory address that doesn't exist which will
+  // automatically crash the computer
 };
 
 #endif // INCLUDE_SRC_INSTRUCTIONS_H_
