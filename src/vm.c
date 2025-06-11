@@ -2,6 +2,7 @@
 #include "instructions.h"
 #include "util.h"
 #include <assert.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -220,16 +221,45 @@ void step(VirtualMachine *vm) {
     }
     break;
   }
-  case ADC: {
+  case ADD: {
+    uint8_t data = deref_indirect(vm->instruction_pointer++, vm, 0);
+    uint16_t result = vm->general_register + data;
+
+    vm->general_register = (uint8_t)result;
+    vm->flags_register = (result > UINT8_MAX);
+
     break;
   }
-  case ADD: {
+  case ADC: {
+    uint8_t data = deref_indirect(vm->instruction_pointer++, vm, 0);
+    uint16_t result = vm->general_register + data + vm->flags_register;
+
+    vm->general_register = (uint8_t)result;
+    vm->flags_register = (result > UINT8_MAX);
+
     break;
   }
   case SUB: {
+    uint8_t data = deref_indirect(vm->instruction_pointer++, vm, 0);
+
+    uint8_t original = vm->general_register;
+    vm->general_register = vm->general_register - data;
+    vm->flags_register = (original > data);
+
     break;
   }
+  // don't get me started on these names
   case SBB: {
+    uint8_t data = deref_indirect(vm->instruction_pointer++, vm, 0);
+    uint8_t borrow_in = vm->flags_register ? 1 : 0;
+    uint8_t temp = vm->general_register - data;
+
+    bool borrowed = vm->general_register < data;
+    vm->general_register = temp - borrow_in;
+
+    bool borrowed_from_borrow = temp < borrow_in;
+    vm->flags_register = borrowed || borrowed_from_borrow;
+
     break;
   }
   case CMP: {
