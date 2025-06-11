@@ -42,96 +42,94 @@ void step(VirtualMachine *vm) {
   }
   switch (vm->memory[vm->instruction_pointer++]) {
   case LOAD: {
-    uint8_t flag = deref_indirect(vm->instruction_pointer++, vm, 0);
-    uint8_t mem_addr = deref_indirect(vm->instruction_pointer++, vm, 0);
+    uint8_t flag = vm->memory[vm->instruction_pointer++];
+    uint8_t data = deref_indirect(vm->instruction_pointer++, vm, 0);
     switch (flag) {
     case 0x0: {
-      vm->general_register = vm->memory[mem_addr];
+      vm->general_register = vm->memory[data];
       break;
     }
     case 0x1: {
       vm->general_register =
-          u16_combine(vm->memory[mem_addr], vm->memory[mem_addr + 1]);
+          u16_combine(vm->memory[data], vm->memory[data + 1]);
       break;
     }
     case 0x2: {
-      vm->stack_pointer =
-          u16_combine(vm->memory[mem_addr], vm->memory[mem_addr + 1]);
+      vm->stack_pointer = u16_combine(vm->memory[data], vm->memory[data + 1]);
       break;
     }
     case 0x3: {
-      vm->base_pointer =
-          u16_combine(vm->memory[mem_addr], vm->memory[mem_addr + 1]);
+      vm->base_pointer = u16_combine(vm->memory[data], vm->memory[data + 1]);
       break;
     }
     }
     break;
   }
   case DUMP: {
-    uint8_t flag = deref_indirect(vm->instruction_pointer++, vm, 0);
-    uint8_t mem_addr = deref_indirect(vm->instruction_pointer++, vm, 0);
+    uint8_t flag = vm->memory[vm->instruction_pointer++];
+    uint8_t data = deref_indirect(vm->instruction_pointer++, vm, 0);
     uint8_t *left = 0;
     uint8_t *right = 0;
     switch (flag) {
     case 0x0: {
-      vm->memory[mem_addr] = vm->general_register;
+      vm->memory[data] = vm->general_register;
       break;
     }
     case 0x1: {
       u16_split(vm->general_register, left, right);
-      vm->memory[mem_addr] = *left;
-      vm->memory[mem_addr + 1] = *right;
+      vm->memory[data] = *left;
+      vm->memory[data + 1] = *right;
       break;
     }
     case 0x2: {
       u16_split(vm->stack_pointer, left, right);
-      vm->memory[mem_addr] = *left;
-      vm->memory[mem_addr + 1] = *right;
+      vm->memory[data] = *left;
+      vm->memory[data + 1] = *right;
       break;
     }
     case 0x3: {
       u16_split(vm->base_pointer, left, right);
-      vm->memory[mem_addr] = *left;
-      vm->memory[mem_addr + 1] = *right;
+      vm->memory[data] = *left;
+      vm->memory[data + 1] = *right;
       break;
     }
     case 0x4: {
       u16_split(vm->instruction_pointer, left, right);
-      vm->memory[mem_addr] = *left;
-      vm->memory[mem_addr + 1] = *right;
+      vm->memory[data] = *left;
+      vm->memory[data + 1] = *right;
       break;
     }
     case 0x5: {
       u16_split(vm->flags_register, left, right);
-      vm->memory[mem_addr] = *left;
-      vm->memory[mem_addr + 1] = *right;
+      vm->memory[data] = *left;
+      vm->memory[data + 1] = *right;
       break;
     }
     }
     break;
   }
   case LDA: {
-    uint8_t flag = deref_indirect(vm->instruction_pointer++, vm, 0);
-    uint8_t mem_addr = deref_indirect(vm->instruction_pointer++, vm, 0);
+    uint8_t flag = vm->memory[vm->instruction_pointer++];
+    uint16_t data = vm->memory[vm->instruction_pointer++];
     switch (flag) {
     case 0x0: {
-      vm->general_register = mem_addr;
+      vm->general_register = data;
       break;
     }
     case 0x1: {
-      vm->stack_pointer = mem_addr;
+      vm->stack_pointer = data;
       break;
     }
     case 0x2: {
-      vm->base_pointer = mem_addr;
+      vm->base_pointer = data;
       break;
     }
     case 0x3: {
-      vm->instruction_pointer = mem_addr;
+      vm->instruction_pointer = data;
       break;
     }
     case 0x4: {
-      vm->flags_register = mem_addr;
+      vm->flags_register = data;
       break;
     }
     }
@@ -140,7 +138,7 @@ void step(VirtualMachine *vm) {
   // least significant first, most significant last for push
   // reverse for pop
   case PUSH: {
-    uint8_t flag = deref_indirect(vm->instruction_pointer++, vm, 0);
+    uint8_t flag = vm->memory[vm->instruction_pointer++];
     uint8_t *left = 0;
     uint8_t *right = 0;
     switch (flag) {
@@ -188,7 +186,7 @@ void step(VirtualMachine *vm) {
     break;
   }
   case POP: {
-    uint8_t flag = deref_indirect(vm->instruction_pointer++, vm, 0);
+    uint8_t flag = vm->memory[vm->instruction_pointer++];
     switch (flag) {
     case 0x0: {
       vm->general_register = vm->memory[vm->stack_pointer++];
@@ -235,18 +233,38 @@ void step(VirtualMachine *vm) {
     break;
   }
   case CMP: {
+    uint8_t data = deref_indirect(vm->instruction_pointer++, vm, 0);
+    if (vm->general_register < data) {
+      vm->flags_register = 0x0;
+    } else if (vm->general_register == data) {
+      vm->flags_register = 0x1;
+    } else if (vm->general_register > data) {
+      vm->flags_register = 0x2;
+    }
+
     break;
   }
   case JNZ: {
+    if (vm->general_register != 0x0) {
+      vm->instruction_pointer = vm->memory[vm->instruction_pointer];
+    } else {
+      vm->instruction_pointer++;
+    }
     break;
   }
   case AND: {
+    uint8_t data = deref_indirect(vm->instruction_pointer++, vm, 0);
+    vm->general_register = vm->general_register & data;
     break;
   }
   case NOT: {
+    uint8_t data = deref_indirect(vm->instruction_pointer++, vm, 0);
+    vm->general_register = ~data;
     break;
   }
   case OR: {
+    uint8_t data = deref_indirect(vm->instruction_pointer++, vm, 0);
+    vm->general_register = vm->general_register | data;
     break;
   }
   case IN: {
