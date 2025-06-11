@@ -37,7 +37,7 @@ Flags same as `LOAD`
 - 2: `LDA [flag] [mem addr]` - Loads the address of a region of memory into the register.
 Flag determines which register to load to. 0x0 = general, 0x1 = stack, 0x2 = base.
 - 3: `PUSH [flag]` - Push data onto the stack from register and adjusts rsp.
-Flag determines whether to dump first, second, both bytes.
+Flag determines which register to load to. Flags same as `LOAD`
 - 4: `POP [flag]` - Pop data off the stack
 into the register and adjusts rsp.
 Flag determines whether to pop off one or two bytes.

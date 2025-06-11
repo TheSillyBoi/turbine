@@ -70,39 +70,31 @@ void step(VirtualMachine *vm) {
   case DUMP: {
     uint8_t flag = deref_indirect(vm->instruction_pointer++, vm, 0);
     uint8_t mem_addr = deref_indirect(vm->instruction_pointer++, vm, 0);
-    uint8_t *left = 0;
-    uint8_t *right = 0;
     switch (flag) {
     case 0x0: {
       vm->memory[mem_addr] = vm->general_register;
       break;
     }
     case 0x1: {
+      uint8_t *left = 0;
+      uint8_t *right = 0;
       u16_split(vm->general_register, left, right);
       vm->memory[mem_addr] = *left;
       vm->memory[mem_addr + 1] = *right;
       break;
     }
     case 0x2: {
+      uint8_t *left = 0;
+      uint8_t *right = 0;
       u16_split(vm->stack_pointer, left, right);
       vm->memory[mem_addr] = *left;
       vm->memory[mem_addr + 1] = *right;
       break;
     }
     case 0x3: {
+      uint8_t *left = 0;
+      uint8_t *right = 0;
       u16_split(vm->base_pointer, left, right);
-      vm->memory[mem_addr] = *left;
-      vm->memory[mem_addr + 1] = *right;
-      break;
-    }
-    case 0x4: {
-      u16_split(vm->instruction_pointer, left, right);
-      vm->memory[mem_addr] = *left;
-      vm->memory[mem_addr + 1] = *right;
-      break;
-    }
-    case 0x5: {
-      u16_split(vm->flags_register, left, right);
       vm->memory[mem_addr] = *left;
       vm->memory[mem_addr + 1] = *right;
       break;
@@ -128,10 +120,6 @@ void step(VirtualMachine *vm) {
     }
     case 0x3: {
       vm->instruction_pointer = mem_addr;
-      break;
-    }
-    case 0x4: {
-      vm->flags_register = mem_addr;
       break;
     }
     }
@@ -210,13 +198,13 @@ void step(VirtualMachine *vm) {
       break;
     }
     case 0x4: {
-      vm->instruction_pointer = u16_combine(vm->memory[vm->stack_pointer++],
-                                            vm->memory[vm->stack_pointer++]);
+      vm->instruction_pointer= u16_combine(vm->memory[vm->stack_pointer++],
+                                     vm->memory[vm->stack_pointer++]);
       break;
     }
     case 0x5: {
-      vm->flags_register = u16_combine(vm->memory[vm->stack_pointer++],
-                                       vm->memory[vm->stack_pointer++]);
+      vm->flags_register= u16_combine(vm->memory[vm->stack_pointer++],
+                                     vm->memory[vm->stack_pointer++]);
       break;
     }
     }
