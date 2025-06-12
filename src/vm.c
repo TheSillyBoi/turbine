@@ -149,47 +149,47 @@ void step(VirtualMachine *vm) {
   // reverse for pop
   case PUSH: {
     uint8_t flag = vm->memory[vm->instruction_pointer++];
-    uint8_t *left = 0;
-    uint8_t *right = 0;
+    uint8_t left = 0;
+    uint8_t right = 0;
     switch (flag) {
     case 0x0: {
-      u16_split(vm->general_register, left, right);
-      vm->memory[vm->stack_pointer--] = *left;
+      u16_split(vm->general_register, &left, &right);
+      vm->memory[vm->stack_pointer--] = left;
       break;
     }
     case 0x1: {
-      u16_split(vm->general_register, left, right);
-      vm->memory[vm->stack_pointer--] = *right;
+      u16_split(vm->general_register, &left, &right);
+      vm->memory[vm->stack_pointer--] = right;
       break;
     }
     case 0x2: {
-      u16_split(vm->general_register, left, right);
-      vm->memory[vm->stack_pointer--] = *left;
-      vm->memory[vm->stack_pointer--] = *right;
+      u16_split(vm->general_register, &left, &right);
+      vm->memory[vm->stack_pointer--] = left;
+      vm->memory[vm->stack_pointer--] = right;
       break;
     }
     case 0x3: {
-      u16_split(vm->stack_pointer, left, right);
-      vm->memory[vm->stack_pointer--] = *left;
-      vm->memory[vm->stack_pointer--] = *right;
+      u16_split(vm->stack_pointer, &left, &right);
+      vm->memory[vm->stack_pointer--] = left;
+      vm->memory[vm->stack_pointer--] = right;
       break;
     }
     case 0x4: {
-      u16_split(vm->base_pointer, left, right);
-      vm->memory[vm->stack_pointer--] = *left;
-      vm->memory[vm->stack_pointer--] = *right;
+      u16_split(vm->base_pointer, &left, &right);
+      vm->memory[vm->stack_pointer--] = left;
+      vm->memory[vm->stack_pointer--] = right;
       break;
     }
     case 0x5: {
-      u16_split(vm->instruction_pointer, left, right);
-      vm->memory[vm->stack_pointer--] = *left;
-      vm->memory[vm->stack_pointer--] = *right;
+      u16_split(vm->instruction_pointer, &left, &right);
+      vm->memory[vm->stack_pointer--] = left;
+      vm->memory[vm->stack_pointer--] = right;
       break;
     }
     case 0x6: {
-      u16_split(vm->flags_register, left, right);
-      vm->memory[vm->stack_pointer--] = *left;
-      vm->memory[vm->stack_pointer--] = *right;
+      u16_split(vm->flags_register, &left, &right);
+      vm->memory[vm->stack_pointer--] = left;
+      vm->memory[vm->stack_pointer--] = right;
       break;
     }
     }
