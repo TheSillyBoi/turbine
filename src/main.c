@@ -10,17 +10,18 @@ int main() {
   uint8_t right = 0;
 
   u16_split(ROM_DATA_START, &left, &right);
-
-  uint8_t text[] = {LOAD, 0x1, left, right, DUMP, 0x0, 0x4, 0x4,
-                    LDA,  0x0, 0x4,  0x0,   PUSH, 0x0, POP, 0x0};
+  uint8_t text[] = {LDD,  0x0, 0x48, 0x0,  DIN, 0x0,  0x0, LDD,  0x0,
+                    0x45, 0x0, DIN,  0x0,  0x0, LDD,  0x0, 0x4C, 0x0,
+                    DIN,  0x0, 0x0,  LDD,  0x0, 0x4c, 0x0, DIN,  0x0,
+                    0x0,  LDD, 0x0,  0x4f, 0x0, DIN,  0x0, 0x0, HLT};
   uint8_t data[] = {0x12};
-  init_text(&vm, text, 16);
+  init_text(&vm, text, 36);
   init_data(&vm, data, 1);
+  init_devices(&vm);
 
-  debug_print(&vm);
-  for (int i = 0; i < 5; i++) {
+  while (!vm.halted) {
     step(&vm);
-    debug_print(&vm);
+    // debug_print(&vm);
   }
 
   delete_vm(&vm);

@@ -1,12 +1,12 @@
 #include "device.h"
+#include <stdio.h>
 
-void in(uint8_t input) {}
-uint8_t out() {
-  return 0x0;
+void in(uint8_t input) {
+  printf("%c", input);
 }
 
-Device device = {
+Device console = {
   .id = 0x0,
   .in = in,
-  .out = out
+  .out = NULL
 };

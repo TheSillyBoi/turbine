@@ -1,4 +1,5 @@
 #include "vm.h"
+#include "device.h"
 #include "instructions.h"
 #include "util.h"
 #include <assert.h>
@@ -9,6 +10,7 @@
 
 VirtualMachine init_vm() {
   uint8_t *memory = malloc(sizeof(uint8_t) + MEMORY_SIZE);
+  Device *devices = malloc(sizeof(Device) + DEVICES_LENGTH);
 
   VirtualMachine vm = {0};
   vm.base_pointer = RAM_END;
@@ -18,6 +20,7 @@ VirtualMachine init_vm() {
   vm.flags_register = 0x0;
   vm.halted = false;
   vm.memory = memory;
+  vm.devices = devices;
 
   return vm;
 }
@@ -37,6 +40,8 @@ void init_data(VirtualMachine *vm, uint8_t *data, uint16_t size) {
     vm->memory[ROM_DATA_START + i] = data[i];
   }
 }
+
+void init_devices(VirtualMachine *vm) { vm->devices[0] = console; }
 
 void step(VirtualMachine *vm) {
   if (vm->instruction_pointer >= MEMORY_SIZE) {
@@ -331,16 +336,36 @@ void step(VirtualMachine *vm) {
     vm->general_register = vm->general_register | data;
     break;
   }
-  case IN: {
+  case DIN: {
+    uint16_t flag1 = vm->memory[vm->instruction_pointer++];
+    uint16_t flag2 = vm->memory[vm->instruction_pointer++];
+    switch (flag2) {
+    case 0x0: {
+      if (flag1 < DEVICES_LENGTH)
+        vm->devices[flag2].in(vm->general_register);
+      break;
+    }
+    case 0x1: {
+      if (flag1 < DEVICES_LENGTH) {
+        uint8_t left = 0;
+        uint8_t right = 0;
+        u16_split(vm->general_register, &left, &right);
+        vm->devices[flag1].in(left);
+        vm->devices[flag1].in(right);
+      }
+      break;
+    }
+    }
+    break;
+  }
+  case DOUT: {
     // uint8_t left = vm->memory[vm->instruction_pointer++];
     // uint8_t right = vm->memory[vm->instruction_pointer++];
     // uint16_t data = u16_combine(left, right);
     break;
   }
-  case OUT: {
-    // uint8_t left = vm->memory[vm->instruction_pointer++];
-    // uint8_t right = vm->memory[vm->instruction_pointer++];
-    // uint16_t data = u16_combine(left, right);
+  case HLT: {
+    vm->halted = true;
     break;
   }
   }

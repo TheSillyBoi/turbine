@@ -34,7 +34,7 @@ Flag determines whether to load 1 or 2 bytes to
 0x0 = 1 byte, 0x1 = 2 bytes, 0x2 = stack, 0x3 = base
 - 1: `DUMP [flag] [mem addr]` - Dump data off the register into memory.
 Flags same as `LOAD`
-- 2: `LDA [flag] [mem addr]` - Loads the address of a region of memory into the register.
+- 2: `LDD [flag] [data]` - Loads data specified into the register. Data is two bytes.
 Flag determines which register to load to. 0x0 = general, 0x1 = stack, 0x2 = base.
 - 3: `PUSH [flag]` - Push data onto the stack from register and adjusts rsp.
 Flag determines which register to load to. Flags same as `LOAD`
@@ -57,7 +57,11 @@ given memory address if register is not zero
 - B: `AND [mem addr]` - Logical AND with register and given memory address
 - C: `NOT [mem addr]` - NOT with given memory address
 - D: `OR [mem addr]` - OR with register and given memory address
-- E: `IN [mem addr]` - Using id of external device from memory,
-dump data from external device into register
-- F: `OUT [mem addr]` - Using id of external device from memory,
+- E: `DIN [flag] [flag2]` - Using id of external device from flag
+dump data from general register into device where
+second flag determines how many bytes.
+- F: `DOUT [flag] [flag2]` - Using id of external device from flag,
+ dump data from device into general register
+where second flag determines how many bytes
 dump data from register into external device
+- 10: `HLT` - Halts the machine.

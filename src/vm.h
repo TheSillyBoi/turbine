@@ -1,6 +1,7 @@
 #ifndef INCLUDE_SRC_VM_H_
 #define INCLUDE_SRC_VM_H_
 
+#include "device.h"
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -19,12 +20,14 @@ typedef struct VirtualMachine {
   uint16_t instruction_pointer;
   uint8_t flags_register;
   uint8_t *memory;
+  Device *devices;
   bool halted;
 } VirtualMachine;
 
 VirtualMachine init_vm();
 void init_text(VirtualMachine *vm, uint8_t *text, uint16_t size);
 void init_data(VirtualMachine *vm, uint8_t *data, uint16_t size);
+void init_devices(VirtualMachine *vm);
 void delete_vm(VirtualMachine *vm);
 void step(VirtualMachine *vm);
 uint8_t deref_indirect(uint8_t reg, VirtualMachine *vm, uint8_t shift);

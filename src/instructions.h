@@ -4,7 +4,7 @@
 enum Instructions {
   LOAD = 0x0,
   DUMP = 0x1,
-  LDA = 0x2,
+  LDD = 0x2,
   PUSH = 0x3,
   POP = 0x4,
   ADD = 0x5,
@@ -16,11 +16,9 @@ enum Instructions {
   AND = 0xB,
   NOT = 0xC,
   OR = 0xD,
-  IN = 0xE,
-  OUT = 0xF,
-  // due to very limited space for instructions, the halt instruction will
-  // basically just be jumping to a memory address that doesn't exist which will
-  // automatically crash the computer
+  DIN = 0xE,
+  DOUT = 0xF,
+  HLT = 0x10
 };
 
 #endif // INCLUDE_SRC_INSTRUCTIONS_H_
