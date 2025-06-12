@@ -1,6 +1,7 @@
 #ifndef INCLUDE_SRC_VM_H_
 #define INCLUDE_SRC_VM_H_
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #define MEMORY_SIZE 0xFFFF
@@ -18,6 +19,7 @@ typedef struct VirtualMachine {
   uint16_t instruction_pointer;
   uint8_t flags_register;
   uint8_t *memory;
+  bool halted;
 } VirtualMachine;
 
 VirtualMachine init_vm();
@@ -26,5 +28,6 @@ void init_data(VirtualMachine *vm, uint8_t *data, uint16_t size);
 void delete_vm(VirtualMachine *vm);
 void step(VirtualMachine *vm);
 uint8_t deref_indirect(uint8_t reg, VirtualMachine *vm, uint8_t shift);
+void debug_print(VirtualMachine *vm);
 
 #endif // INCLUDE_SRC_VM_H_
