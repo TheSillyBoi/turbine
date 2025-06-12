@@ -11,22 +11,17 @@ int main() {
 
   u16_split(ROM_DATA_START, &left, &right);
 
-  uint8_t text[] = {LOAD, 0x1, left, right, DUMP, 0x0, 0x4, 0x4, LDA, 0x0, 0x4, 0x0, PUSH, 0x0};
+  uint8_t text[] = {LOAD, 0x1, left, right, DUMP, 0x0, 0x4, 0x4,
+                    LDA,  0x0, 0x4,  0x0,   PUSH, 0x0, POP, 0x0};
   uint8_t data[] = {0x12};
-  init_text(&vm, text, 14);
+  init_text(&vm, text, 16);
   init_data(&vm, data, 1);
 
   debug_print(&vm);
-  step(&vm);
-  debug_print(&vm);
-  step(&vm);
-  debug_print(&vm);
-  step(&vm);
-  debug_print(&vm);
-  step(&vm);
-  debug_print(&vm);
-  step(&vm);
-  debug_print(&vm);
+  for (int i = 0; i < 5; i++) {
+    step(&vm);
+    debug_print(&vm);
+  }
 
   delete_vm(&vm);
   return EXIT_SUCCESS;
