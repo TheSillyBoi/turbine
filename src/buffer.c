@@ -17,4 +17,11 @@ void push_buffer(Buffer *buffer, uint8_t data) {
   }
   buffer->data[buffer->size - 1] = data;
 }
+
+// bounds checking should be done by the user
 uint8_t pop_buffer(Buffer *buffer) { return buffer->data[buffer->size-- - 1]; }
+
+// bounds checking should be done by the user
+uint8_t get_buffer(Buffer *buffer, uint16_t index) {
+  return buffer->data[index];
+}
