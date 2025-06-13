@@ -25,11 +25,11 @@ typedef struct VirtualMachine {
 } VirtualMachine;
 
 VirtualMachine init_vm();
-void init_text(VirtualMachine *vm, uint8_t *text, uint16_t size);
-void init_data(VirtualMachine *vm, uint8_t *data, uint16_t size);
+void init_text_vm(VirtualMachine *vm, uint8_t *text, uint16_t size);
+void init_data_vm(VirtualMachine *vm, uint8_t *data, uint16_t size);
 void delete_vm(VirtualMachine *vm);
-void step(VirtualMachine *vm);
-uint8_t deref_indirect(uint8_t reg, VirtualMachine *vm, uint8_t shift);
-void debug_print(VirtualMachine *vm);
+void step_vm(VirtualMachine *vm);
+uint8_t deref_indirect_vm(uint8_t reg, VirtualMachine *vm, uint8_t shift);
+void debug_print_vm(VirtualMachine *vm);
 
 #endif // INCLUDE_SRC_VM_H_

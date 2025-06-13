@@ -10,7 +10,7 @@
 
 VirtualMachine init_vm() {
   uint8_t *memory = malloc(sizeof(uint8_t) * MEMORY_SIZE);
-  Device *devices = malloc(sizeof(Device) * (DEVICES_LENGTH));
+  Device *devices = malloc(sizeof(Device) * DEVICES_LENGTH);
 
   VirtualMachine vm = {0};
   vm.base_pointer = RAM_END;
@@ -21,29 +21,32 @@ VirtualMachine init_vm() {
   vm.halted = false;
   vm.memory = memory;
   vm.devices = devices;
-  vm.devices[0] = console; 
+  vm.devices[0] = console;
   vm.devices[1] = screen;
 
   return vm;
 }
 
-void delete_vm(VirtualMachine *vm) { free(vm->memory); free(vm->devices); }
+void delete_vm(VirtualMachine *vm) {
+  free(vm->memory);
+  free(vm->devices);
+}
 
-void init_text(VirtualMachine *vm, uint8_t *text, uint16_t size) {
+void init_text_vm(VirtualMachine *vm, uint8_t *text, uint16_t size) {
   assert(size < ROM_TEXT_END - ROM_TEXT_START + 1);
   for (int i = 0; i < size; i++) {
     vm->memory[ROM_TEXT_START + i] = text[i];
   }
 }
 
-void init_data(VirtualMachine *vm, uint8_t *data, uint16_t size) {
+void init_data_vm(VirtualMachine *vm, uint8_t *data, uint16_t size) {
   assert(size < ROM_DATA_END - ROM_DATA_START + 1);
   for (int i = 0; i < size; i++) {
     vm->memory[ROM_DATA_START + i] = data[i];
   }
 }
 
-void step(VirtualMachine *vm) {
+void step_vm(VirtualMachine *vm) {
   if (vm->instruction_pointer >= MEMORY_SIZE) {
     printf("[vm] PROGRAM END\n");
     vm->halted = true;
@@ -372,7 +375,7 @@ void step(VirtualMachine *vm) {
   }
 }
 
-void debug_print(VirtualMachine *vm) {
+void debug_print_vm(VirtualMachine *vm) {
   printf("General Register: 0x%x\n", vm->general_register);
   printf("Instruction Pointer: 0x%x\n", vm->instruction_pointer);
   printf("Stack Pointer: 0x%x\n", vm->stack_pointer);
@@ -389,6 +392,6 @@ void debug_print(VirtualMachine *vm) {
 
 // Will most likely be used for instruction ptr as that often points to
 // instructions which point to another instruction
-uint8_t deref_indirect(uint8_t reg, VirtualMachine *vm, uint8_t shift) {
+uint8_t deref_indirect_vm(uint8_t reg, VirtualMachine *vm, uint8_t shift) {
   return vm->memory[vm->memory[reg] + shift];
 }
