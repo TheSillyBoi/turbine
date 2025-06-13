@@ -24,6 +24,12 @@ VirtualMachine init_vm() {
   vm.devices[0] = console;
   vm.devices[1] = screen;
 
+  for (int i = 0; i < DEVICES_LENGTH; i++) {
+    if (vm.devices[i].init != NULL) {
+      vm.devices[i].init();
+    }
+  }
+
   return vm;
 }
 

@@ -8,11 +8,6 @@ void console_in(uint8_t input) { printf("%c", input); }
 // idk how im going to get input from the user
 Device console = {.id = 0x0, .in = console_in, .init = NULL, .out = NULL};
 
-struct {
-  uint8_t step;
-  uint8_t buffer[4];
-} data;
-
 // super simple 255x255 display
 // display output isn't meaningful to the cpu
 // so no output function here either

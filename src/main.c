@@ -1,8 +1,6 @@
-#include "buffer.h"
 #include "instructions.h"
 #include "util.h"
 #include "vm.h"
-#include <stdio.h>
 #include <stdlib.h>
 
 int main() {
@@ -25,15 +23,6 @@ int main() {
     // debug_print(&vm);
   }
 
-  Buffer buffer = init_buffer();
-  push_buffer(&buffer, 0);
-  push_buffer(&buffer, 1);
-  push_buffer(&buffer, 2);
-
-  printf("\n%d %d %d\n", pop_buffer(&buffer), pop_buffer(&buffer),
-         pop_buffer(&buffer));
-
   delete_vm(&vm);
-  delete_buffer(&buffer);
   return EXIT_SUCCESS;
 }
