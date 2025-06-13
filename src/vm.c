@@ -9,8 +9,8 @@
 #include <stdlib.h>
 
 VirtualMachine init_vm() {
-  uint8_t *memory = malloc(sizeof(uint8_t) + MEMORY_SIZE);
-  Device *devices = malloc(sizeof(Device) + DEVICES_LENGTH);
+  uint8_t *memory = malloc(sizeof(uint8_t) * MEMORY_SIZE);
+  Device *devices = malloc(sizeof(Device) * (DEVICES_LENGTH));
 
   VirtualMachine vm = {0};
   vm.base_pointer = RAM_END;
@@ -21,11 +21,13 @@ VirtualMachine init_vm() {
   vm.halted = false;
   vm.memory = memory;
   vm.devices = devices;
+  vm.devices[0] = console; 
+  vm.devices[1] = screen;
 
   return vm;
 }
 
-void delete_vm(VirtualMachine *vm) { free(vm->memory); }
+void delete_vm(VirtualMachine *vm) { free(vm->memory); free(vm->devices); }
 
 void init_text(VirtualMachine *vm, uint8_t *text, uint16_t size) {
   assert(size < ROM_TEXT_END - ROM_TEXT_START + 1);
@@ -40,8 +42,6 @@ void init_data(VirtualMachine *vm, uint8_t *data, uint16_t size) {
     vm->memory[ROM_DATA_START + i] = data[i];
   }
 }
-
-void init_devices(VirtualMachine *vm) { vm->devices[0] = console; }
 
 void step(VirtualMachine *vm) {
   if (vm->instruction_pointer >= MEMORY_SIZE) {
@@ -121,7 +121,7 @@ void step(VirtualMachine *vm) {
     }
     break;
   }
-  case LDA: {
+  case LDD: {
     uint8_t flag = vm->memory[vm->instruction_pointer++];
     uint8_t left = vm->memory[vm->instruction_pointer++];
     uint8_t right = vm->memory[vm->instruction_pointer++];
@@ -358,6 +358,7 @@ void step(VirtualMachine *vm) {
     }
     break;
   }
+  // idk how im gonna do output
   case DOUT: {
     // uint8_t left = vm->memory[vm->instruction_pointer++];
     // uint8_t right = vm->memory[vm->instruction_pointer++];
