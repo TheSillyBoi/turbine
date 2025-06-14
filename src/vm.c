@@ -1,5 +1,6 @@
 #include "vm.h"
 #include "device.h"
+#include "flags.h"
 #include "instructions.h"
 #include "util.h"
 #include <assert.h>
@@ -19,7 +20,7 @@ VirtualMachine init_vm() {
   vm.register_b = 0x0;
   vm.accumulator = 0x0;
   vm.instruction_pointer = 0x0;
-  vm.flags_register = 0x0;
+  vm.status_register = 0x0;
   vm.halted = false;
   vm.memory = memory;
   vm.devices = devices;
@@ -55,326 +56,419 @@ void init_data_vm(VirtualMachine *vm, uint8_t *data, uint16_t size) {
 }
 
 void step_vm(VirtualMachine *vm) {
+  if (vm->halted) {
+    return;
+  }
   switch (vm->memory[vm->instruction_pointer++]) {
   case LOAD: {
-    uint8_t flag = vm->memory[vm->instruction_pointer++];
-    uint8_t left = vm->memory[vm->instruction_pointer++];
-    uint8_t right = vm->memory[vm->instruction_pointer++];
-    uint16_t data = u16_combine(left, right);
-    switch (flag) {
-    case 0x0: {
-      vm->register_a = vm->memory[data];
+    uint8_t reg_flag = vm->memory[vm->instruction_pointer++];
+    uint8_t left_mem_addr = vm->memory[vm->instruction_pointer++];
+    uint8_t right_mem_addr = vm->memory[vm->instruction_pointer++];
+    uint8_t mem_addr = u16_combine(left_mem_addr, right_mem_addr);
+
+    switch (reg_flag) {
+    case RA_BYTE: {
+      vm->register_a = vm->memory[mem_addr];
       break;
     }
-    case 0x1: {
-      vm->register_a = u16_combine(vm->memory[data], vm->memory[data + 1]);
+    case RA_TWO_BYTES: {
+      vm->register_a =
+          u16_combine(vm->memory[mem_addr], vm->memory[mem_addr + 1]);
       break;
     }
-    case 0x2: {
-      vm->register_b = vm->memory[data];
+    case RB_BYTE: {
+      vm->register_b = vm->memory[mem_addr];
       break;
     }
-    case 0x3: {
-      vm->register_a = u16_combine(vm->memory[data], vm->memory[data + 1]);
+    case RB_TWO_BYTES: {
+      vm->register_b =
+          u16_combine(vm->memory[mem_addr], vm->memory[mem_addr + 1]);
       break;
     }
-    case 0x4: {
-      vm->stack_pointer = u16_combine(vm->memory[data], vm->memory[data + 1]);
+    case STACK_PTR: {
+      vm->stack_pointer =
+          u16_combine(vm->memory[mem_addr], vm->memory[mem_addr + 1]);
       break;
     }
-    case 0x5: {
-      vm->base_pointer = u16_combine(vm->memory[data], vm->memory[data + 1]);
+    case BASE_PTR: {
+      vm->base_pointer =
+          u16_combine(vm->memory[mem_addr], vm->memory[mem_addr + 1]);
+      break;
+    }
+    case ACCUMULATOR: {
+      vm->accumulator =
+          u16_combine(vm->memory[mem_addr], vm->memory[mem_addr + 1]);
+      break;
+    }
+    case STATUS: {
+      vm->status_register = vm->memory[mem_addr];
       break;
     }
     }
+
     break;
   }
   case DUMP: {
-    uint8_t flag = vm->memory[vm->instruction_pointer++];
-    uint8_t left = vm->memory[vm->instruction_pointer++];
-    uint8_t right = vm->memory[vm->instruction_pointer++];
-    uint16_t data = u16_combine(left, right);
+    uint8_t reg_flag = vm->memory[vm->instruction_pointer++];
+    uint8_t left_mem_addr = vm->memory[vm->instruction_pointer++];
+    uint8_t right_mem_addr = vm->memory[vm->instruction_pointer++];
+    uint8_t mem_addr = u16_combine(left_mem_addr, right_mem_addr);
 
-    left = 0;
-    right = 0;
-    switch (flag) {
-    case 0x0: {
-      vm->memory[data] = vm->register_a;
+    switch (reg_flag) {
+    case RA_BYTE: {
+      vm->memory[mem_addr] = vm->register_a;
       break;
     }
-    case 0x1: {
+    case RA_TWO_BYTES: {
+      uint8_t left = 0;
+      uint8_t right = 0;
       u16_split(vm->register_a, &left, &right);
-      vm->memory[data] = left;
-      vm->memory[data + 1] = right;
+      vm->memory[mem_addr] = left;
+      vm->memory[mem_addr + 1] = right;
       break;
     }
-    case 0x2: {
-      vm->memory[data] = vm->register_b;
+    case RB_BYTE: {
+      vm->memory[mem_addr] = vm->register_b;
       break;
     }
-    case 0x3: {
+    case RB_TWO_BYTES: {
+      uint8_t left = 0;
+      uint8_t right = 0;
+      u16_split(vm->register_b, &left, &right);
+      vm->memory[mem_addr] = left;
+      vm->memory[mem_addr + 1] = right;
+      break;
+    }
+    case STACK_PTR: {
+      uint8_t left = 0;
+      uint8_t right = 0;
       u16_split(vm->stack_pointer, &left, &right);
-      vm->memory[data] = left;
-      vm->memory[data + 1] = right;
+      vm->memory[mem_addr] = left;
+      vm->memory[mem_addr + 1] = right;
       break;
     }
-    case 0x4: {
+    case BASE_PTR: {
+      uint8_t left = 0;
+      uint8_t right = 0;
       u16_split(vm->base_pointer, &left, &right);
-      vm->memory[data] = left;
-      vm->memory[data + 1] = right;
+      vm->memory[mem_addr] = left;
+      vm->memory[mem_addr + 1] = right;
       break;
     }
-    case 0x5: {
-      u16_split(vm->instruction_pointer, &left, &right);
-      vm->memory[data] = left;
-      vm->memory[data + 1] = right;
+    case ACCUMULATOR: {
+      uint8_t left = 0;
+      uint8_t right = 0;
+      u16_split(vm->accumulator, &left, &right);
+      vm->memory[mem_addr] = left;
+      vm->memory[mem_addr + 1] = right;
+      break;
+    }
+    case STATUS: {
+      vm->memory[mem_addr] = vm->status_register;
       break;
     }
     }
+
+    break;
+  }
+  case MOVE: {
+    uint16_t *reg1 = NULL;
+    uint16_t *reg2 = NULL;
+
+    reg_flag_parser(vm, &reg1);
+    reg_flag_parser(vm, &reg2);
+
+    *reg2 = *reg1;
+
     break;
   }
   case LDD: {
-    uint8_t flag = vm->memory[vm->instruction_pointer++];
-    uint8_t left = vm->memory[vm->instruction_pointer++];
-    uint8_t right = vm->memory[vm->instruction_pointer++];
-    uint16_t data = u16_combine(left, right);
-    switch (flag) {
-    case 0x0: {
-      vm->register_a = data;
+    switch (vm->memory[vm->instruction_pointer++]) {
+    case RA_BYTE: {
+      vm->register_a = vm->memory[vm->instruction_pointer];
       break;
     }
-    case 0x1: {
-      vm->stack_pointer = data;
+    case RA_TWO_BYTES: {
+      uint8_t left = vm->memory[vm->instruction_pointer++];
+      uint8_t right = vm->memory[vm->instruction_pointer];
+      vm->register_a = u16_combine(left, right);
       break;
     }
-    case 0x2: {
-      vm->base_pointer = data;
+    case RB_BYTE: {
+      vm->register_b = vm->memory[vm->instruction_pointer];
       break;
     }
-    case 0x3: {
-      vm->instruction_pointer = data;
+    case RB_TWO_BYTES: {
+      uint8_t left = vm->memory[vm->instruction_pointer++];
+      uint8_t right = vm->memory[vm->instruction_pointer];
+      vm->register_b = u16_combine(left, right);
       break;
     }
-    case 0x4: {
-      vm->flags_register = data;
+    case STACK_PTR: {
+      uint8_t left = vm->memory[vm->instruction_pointer++];
+      uint8_t right = vm->memory[vm->instruction_pointer];
+      vm->stack_pointer = u16_combine(left, right);
+      break;
+    }
+    case BASE_PTR: {
+      uint8_t left = vm->memory[vm->instruction_pointer++];
+      uint8_t right = vm->memory[vm->instruction_pointer];
+      vm->base_pointer = u16_combine(left, right);
+      break;
+    }
+    case ACCUMULATOR: {
+      uint8_t left = vm->memory[vm->instruction_pointer++];
+      uint8_t right = vm->memory[vm->instruction_pointer];
+      vm->accumulator = u16_combine(left, right);
+      break;
+    }
+    case STATUS: {
+      vm->status_register = vm->memory[vm->instruction_pointer];
       break;
     }
     }
-    break;
   }
-  // least significant first, most significant last for push
-  // reverse for pop
+  // left first, right last for push and reverse for pop
   case PUSH: {
-    uint8_t flag = vm->memory[vm->instruction_pointer++];
-    uint8_t left = 0;
-    uint8_t right = 0;
-    switch (flag) {
-    case 0x0: {
-      u16_split(vm->register_a, &left, &right);
-      vm->memory[vm->stack_pointer--] = left;
+    switch (vm->memory[vm->instruction_pointer++]) {
+    case RA_BYTE: {
+      vm->memory[vm->stack_pointer--] = vm->register_a;
       break;
     }
-    case 0x1: {
-      u16_split(vm->register_a, &left, &right);
-      vm->memory[vm->stack_pointer--] = right;
-      break;
-    }
-    case 0x2: {
+    case RA_TWO_BYTES: {
+      uint8_t left = 0;
+      uint8_t right = 0;
       u16_split(vm->register_a, &left, &right);
       vm->memory[vm->stack_pointer--] = left;
       vm->memory[vm->stack_pointer--] = right;
       break;
     }
-    case 0x3: {
+    case RB_BYTE: {
+      vm->memory[vm->stack_pointer] = vm->register_a;
+      break;
+    }
+    case RB_TWO_BYTES: {
+      uint8_t left = 0;
+      uint8_t right = 0;
+      u16_split(vm->register_b, &left, &right);
+      vm->memory[vm->stack_pointer--] = left;
+      vm->memory[vm->stack_pointer--] = right;
+      break;
+    }
+    case STACK_PTR: {
+      uint8_t left = 0;
+      uint8_t right = 0;
       u16_split(vm->stack_pointer, &left, &right);
       vm->memory[vm->stack_pointer--] = left;
       vm->memory[vm->stack_pointer--] = right;
       break;
     }
-    case 0x4: {
+    case BASE_PTR: {
+      uint8_t left = 0;
+      uint8_t right = 0;
       u16_split(vm->base_pointer, &left, &right);
       vm->memory[vm->stack_pointer--] = left;
       vm->memory[vm->stack_pointer--] = right;
       break;
     }
-    case 0x5: {
-      u16_split(vm->instruction_pointer, &left, &right);
+    case ACCUMULATOR: {
+      uint8_t left = 0;
+      uint8_t right = 0;
+      u16_split(vm->accumulator, &left, &right);
       vm->memory[vm->stack_pointer--] = left;
       vm->memory[vm->stack_pointer--] = right;
       break;
     }
-    case 0x6: {
-      u16_split(vm->flags_register, &left, &right);
-      vm->memory[vm->stack_pointer--] = left;
-      vm->memory[vm->stack_pointer--] = right;
+    case STATUS: {
+      vm->memory[vm->stack_pointer--] = vm->status_register;
       break;
     }
     }
     break;
   }
   case POP: {
-    uint8_t flag = vm->memory[vm->instruction_pointer++];
-    if (vm->stack_pointer < RAM_END) {
-      switch (flag) {
-      case 0x0: {
-        vm->register_a = vm->memory[vm->stack_pointer + 1];
-        vm->stack_pointer += 1;
-        break;
-      }
-      case 0x1: {
-        vm->register_a = u16_combine(vm->memory[vm->stack_pointer + 1],
-                                     vm->memory[vm->stack_pointer + 2]);
-        vm->stack_pointer += 2;
-        break;
-      }
-      case 0x2: {
-        vm->stack_pointer = u16_combine(vm->memory[vm->stack_pointer + 1],
-                                        vm->memory[vm->stack_pointer + 2]);
-        break;
-      }
-      case 0x3: {
-        vm->base_pointer = u16_combine(vm->memory[vm->stack_pointer + 1],
-                                       vm->memory[vm->stack_pointer + 2]);
-        vm->stack_pointer += 2;
-        break;
-      }
-      case 0x4: {
-        vm->instruction_pointer =
-            u16_combine(vm->memory[vm->stack_pointer + 1],
-                        vm->memory[vm->stack_pointer + 2]);
+    switch (vm->memory[vm->instruction_pointer++]) {
+    case RA_BYTE: {
+      vm->register_a = vm->memory[vm->stack_pointer++];
+      break;
+    }
+    case RA_TWO_BYTES: {
+      uint8_t right = vm->memory[vm->stack_pointer++];
+      uint8_t left = vm->memory[vm->stack_pointer++];
 
-        vm->stack_pointer += 2;
-        break;
-      }
-      case 0x5: {
-        vm->flags_register = u16_combine(vm->memory[vm->stack_pointer + 1],
-                                         vm->memory[vm->stack_pointer + 2]);
-        vm->stack_pointer += 2;
-        break;
-      }
-      }
+      vm->register_a = u16_combine(left, right);
+      break;
+    }
+    case RB_BYTE: {
+      vm->register_b = vm->memory[vm->stack_pointer++];
+      break;
+    }
+    case RB_TWO_BYTES: {
+      uint8_t right = vm->memory[vm->stack_pointer++];
+      uint8_t left = vm->memory[vm->stack_pointer++];
+
+      vm->register_b = u16_combine(left, right);
+      vm->register_b = vm->memory[vm->stack_pointer++];
+      break;
+    }
+    case STACK_PTR: {
+      uint8_t right = vm->memory[vm->stack_pointer++];
+      uint8_t left = vm->memory[vm->stack_pointer++];
+
+      vm->stack_pointer = u16_combine(left, right);
+      break;
+    }
+    case BASE_PTR: {
+      uint8_t right = vm->memory[vm->stack_pointer++];
+      uint8_t left = vm->memory[vm->stack_pointer++];
+
+      vm->base_pointer = u16_combine(left, right);
+      break;
+    }
+    case ACCUMULATOR: {
+      uint8_t right = vm->memory[vm->stack_pointer++];
+      uint8_t left = vm->memory[vm->stack_pointer++];
+
+      vm->accumulator = u16_combine(left, right);
+      break;
+    }
+    case STATUS: {
+      vm->status_register = vm->memory[vm->stack_pointer++];
+      break;
+    }
     }
     break;
   }
   case ADD: {
-    uint8_t left = vm->memory[vm->instruction_pointer++];
-    uint8_t right = vm->memory[vm->instruction_pointer++];
-    uint16_t data = vm->memory[u16_combine(left, right)];
-    uint16_t result = vm->register_a + data;
+    uint16_t *reg1 = NULL;
+    uint16_t *reg2 = NULL;
 
-    vm->register_a = (uint8_t)result;
-    vm->flags_register = (result > UINT8_MAX);
+    reg_flag_parser(vm, &reg1);
+    reg_flag_parser(vm, &reg2);
+
+    uint16_t result = *reg1 + *reg2;
+    vm->accumulator = (uint8_t)result;
+    vm->status_register = (result > 255) ? ADD_CARRY : ADD_NO_CARRY;
 
     break;
   }
   case ADC: {
-    uint8_t left = vm->memory[vm->instruction_pointer++];
-    uint8_t right = vm->memory[vm->instruction_pointer++];
-    uint16_t data = vm->memory[u16_combine(left, right)];
-    uint16_t result = vm->register_a + data + vm->flags_register;
+    uint16_t *reg1 = NULL;
+    uint16_t *reg2 = NULL;
 
-    vm->register_a = (uint8_t)result;
-    vm->flags_register = (result > UINT8_MAX);
+    reg_flag_parser(vm, &reg1);
+    reg_flag_parser(vm, &reg2);
+
+    uint16_t result =
+        *reg1 + *reg2 + (vm->status_register == ADD_CARRY ? 1 : 0);
+    vm->accumulator = (uint8_t)result;
+    vm->status_register = (result > 255) ? ADD_CARRY : ADD_NO_CARRY;
 
     break;
   }
   case SUB: {
-    uint8_t left = vm->memory[vm->instruction_pointer++];
-    uint8_t right = vm->memory[vm->instruction_pointer++];
-    uint16_t data = vm->memory[u16_combine(left, right)];
+    uint16_t *reg1 = NULL;
+    uint16_t *reg2 = NULL;
 
-    uint8_t original = vm->register_a;
-    vm->register_a = vm->register_a - data;
-    vm->flags_register = (original > data);
+    reg_flag_parser(vm, &reg1);
+    reg_flag_parser(vm, &reg2);
+
+    bool borrowed = (*reg1 < *reg2);
+
+    vm->accumulator = *reg1 - *reg2;
+    vm->status_register = (borrowed) ? SUB_BORROW : SUB_NO_BORROW;
 
     break;
   }
-  // don't get me started on these names
+
   case SBB: {
-    uint8_t left = vm->memory[vm->instruction_pointer++];
-    uint8_t right = vm->memory[vm->instruction_pointer++];
-    uint16_t data = vm->memory[u16_combine(left, right)];
-    uint8_t borrow_in = vm->flags_register ? 1 : 0;
-    uint8_t temp = vm->register_a - data;
+    uint16_t *reg1 = NULL;
+    uint16_t *reg2 = NULL;
 
-    bool borrowed = vm->register_a < data;
-    vm->register_a = temp - borrow_in;
+    reg_flag_parser(vm, &reg1);
+    reg_flag_parser(vm, &reg2);
 
-    bool borrowed_from_borrow = temp < borrow_in;
-    vm->flags_register = borrowed || borrowed_from_borrow;
+    uint8_t borrow_in_value = (vm->status_register == SUB_BORROW ? 1 : 0);
+    uint16_t total_subtract_amount = (uint16_t)*reg2 + borrow_in_value;
+    bool new_borrow_occurred = (*reg1 < total_subtract_amount);
+    *reg1 = *reg1 - (uint8_t)total_subtract_amount;
+    vm->status_register = new_borrow_occurred ? SUB_BORROW : SUB_NO_BORROW;
 
-    break;
-  }
-  case CMP: {
-    uint8_t left = vm->memory[vm->instruction_pointer++];
-    uint8_t right = vm->memory[vm->instruction_pointer++];
-    uint16_t data = vm->memory[u16_combine(left, right)];
-    if (vm->register_a < data) {
-      vm->flags_register = 0x0;
-    } else if (vm->register_a == data) {
-      vm->flags_register = 0x1;
-    } else if (vm->register_a > data) {
-      vm->flags_register = 0x2;
-    }
-
-    break;
-  }
-  case JNZ: {
-    if (vm->register_a != 0x0) {
-      vm->instruction_pointer = vm->memory[vm->instruction_pointer];
-    } else {
-      vm->instruction_pointer++;
-    }
-    break;
-  }
-  case AND: {
-    uint8_t left = vm->memory[vm->instruction_pointer++];
-    uint8_t right = vm->memory[vm->instruction_pointer++];
-    uint16_t data = vm->memory[u16_combine(left, right)];
-    vm->register_a = vm->register_a & data;
     break;
   }
   case NOT: {
-    uint8_t left = vm->memory[vm->instruction_pointer++];
-    uint8_t right = vm->memory[vm->instruction_pointer++];
-    uint16_t data = vm->memory[u16_combine(left, right)];
-    vm->register_a = ~data;
+    uint16_t *reg1 = NULL;
+    reg_flag_parser(vm, &reg1);
+
+    vm->accumulator = ~(*reg1);
     break;
   }
   case OR: {
-    uint8_t left = vm->memory[vm->instruction_pointer++];
-    uint8_t right = vm->memory[vm->instruction_pointer++];
-    uint16_t data = vm->memory[u16_combine(left, right)];
-    vm->register_a = vm->register_a | data;
+    uint16_t *reg1 = NULL;
+    uint16_t *reg2 = NULL;
+
+    reg_flag_parser(vm, &reg1);
+    reg_flag_parser(vm, &reg2);
+
+    vm->accumulator = *reg1 | *reg2;
+    break;
+  }
+  case AND: {
+    uint16_t *reg1 = NULL;
+    uint16_t *reg2 = NULL;
+
+    reg_flag_parser(vm, &reg1);
+    reg_flag_parser(vm, &reg2);
+
+    vm->accumulator = *reg1 & *reg2;
+    break;
+  }
+  case CMP: {
+    uint16_t *reg1 = NULL;
+    uint16_t *reg2 = NULL;
+
+    reg_flag_parser(vm, &reg1);
+    reg_flag_parser(vm, &reg2);
+
+    if (*reg1 > *reg2) {
+      vm->status_register = CMP_GREATER_THAN;
+    } else if (*reg1 == *reg2) {
+      vm->status_register = CMP_EQUAL_TO;
+    } else {
+      vm->status_register = CMP_LESS_THAN;
+    }
+
+    break;
+  }
+  case JUMP: {
+    uint8_t status = vm->memory[vm->instruction_pointer++];
+    uint8_t left_memory_addr = vm->memory[vm->instruction_pointer++];
+    uint8_t right_memory_addr = vm->memory[vm->instruction_pointer++];
+    uint16_t memory_addr = u16_combine(left_memory_addr, right_memory_addr);
+    if (status == vm->status_register) {
+      vm->instruction_pointer = vm->memory[memory_addr];
+    }
+
     break;
   }
   case DIN: {
-    uint16_t flag1 = vm->memory[vm->instruction_pointer++];
-    uint16_t flag2 = vm->memory[vm->instruction_pointer++];
-    switch (flag2) {
-    case 0x0: {
-      if (flag1 < DEVICES_LENGTH)
-        vm->devices[flag2].in(vm->register_a);
-      break;
-    }
-    case 0x1: {
-      if (flag1 < DEVICES_LENGTH) {
-        uint8_t left = 0;
-        uint8_t right = 0;
-        u16_split(vm->register_a, &left, &right);
-        vm->devices[flag1].in(left);
-        vm->devices[flag1].in(right);
+    uint8_t device_id = vm->memory[vm->instruction_pointer++];
+    uint16_t *reg = NULL;
+    reg_flag_parser(vm, &reg);
+    if (device_id > 0 && device_id < DEVICES_LENGTH) {
+      if (vm->devices[device_id].in != NULL) {
+        vm->devices[device_id].in(*reg);
       }
-      break;
-    }
     }
     break;
   }
-  // idk how im gonna do output
   case DOUT: {
-    // uint8_t left = vm->memory[vm->instruction_pointer++];
-    // uint8_t right = vm->memory[vm->instruction_pointer++];
-    // uint16_t data = u16_combine(left, right);
+    uint8_t device_id = vm->memory[vm->instruction_pointer++];
+    if (device_id > 0 && device_id < DEVICES_LENGTH) {
+      if (vm->devices[device_id].out != NULL) {
+        vm->accumulator = vm->devices[device_id].out();
+      }
+    }
     break;
   }
   case HLT: {
@@ -384,12 +478,45 @@ void step_vm(VirtualMachine *vm) {
   }
 }
 
+void reg_flag_parser(VirtualMachine *vm, uint16_t **ptr) {
+  switch (vm->memory[vm->instruction_pointer++]) {
+  case RA_BYTE:
+  case RA_TWO_BYTES: {
+    *ptr = &vm->register_a;
+    break;
+  }
+  case RB_BYTE:
+  case RB_TWO_BYTES: {
+    *ptr = &vm->register_b;
+    break;
+  }
+  case STACK_PTR: {
+    *ptr = &vm->stack_pointer;
+    break;
+  }
+  case BASE_PTR: {
+    *ptr = &vm->base_pointer;
+    break;
+  }
+  case ACCUMULATOR: {
+    *ptr = &vm->accumulator;
+    break;
+  }
+  case STATUS: {
+    *ptr = (uint16_t *)&vm->status_register;
+    break;
+  }
+  }
+}
+
 void debug_print_vm(VirtualMachine *vm) {
-  printf("General Register: 0x%x\n", vm->register_a);
+  printf("Register A: 0x%x\n", vm->register_a);
+  printf("Register B: 0x%x\n", vm->register_b);
+  printf("Accumulator: 0x%x\n", vm->accumulator);
   printf("Instruction Pointer: 0x%x\n", vm->instruction_pointer);
   printf("Stack Pointer: 0x%x\n", vm->stack_pointer);
   printf("Base Pointer: 0x%x\n", vm->base_pointer);
-  printf("Flags Register: 0x%x\n", vm->flags_register);
+  printf("Status Register: 0x%x\n", vm->status_register);
   printf("Memory: \n");
   for (uint16_t i = 0; i < MEMORY_SIZE; i++) {
     if (vm->memory[i] != 0) {
@@ -397,10 +524,4 @@ void debug_print_vm(VirtualMachine *vm) {
     }
   }
   printf("\n");
-}
-
-// Will most likely be used for instruction ptr as that often points to
-// instructions which point to another instruction
-uint8_t deref_indirect_vm(uint8_t reg, VirtualMachine *vm, uint8_t shift) {
-  return vm->memory[vm->memory[reg] + shift];
 }

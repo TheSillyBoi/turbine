@@ -1,7 +1,7 @@
 #ifndef INCLUDE_SRC_INSTRUCTIONS_H_
 #define INCLUDE_SRC_INSTRUCTIONS_H_
 
-enum Instructions {
+typedef enum Instruction {
   LOAD = 0x0,
   DUMP = 0x1,
   MOVE = 0x2,
@@ -20,6 +20,6 @@ enum Instructions {
   DIN = 0xF,
   DOUT = 0x10,
   HLT = 0x11,
-};
+} Instruction;
 
 #endif // INCLUDE_SRC_INSTRUCTIONS_H_

@@ -30,20 +30,20 @@ Custom CPU Architecture and emulator for that architecture made for fun!
 - `0x0`  -> `LOAD [reg flag] [mem addr]`
 - `0x1`  -> `DUMP [reg flag] [mem addr]`
 - `0x2`  -> `MOVE [reg flag] [reg flag]`*
-- `0x3`  -> `LDD [reg flag] [data]`*
+- `0x3`  -> `LDD [reg flag] [data]`
 - `0x4`  -> `PUSH [reg flag]`
 - `0x5`  -> `POP [reg flag]`
-- `0x6`  -> `ADD`
-- `0x7`  -> `ADC`
-- `0x8`  -> `SUB`
-- `0x9`  -> `SBB`
-- `0xA`  -> `NOT`
-- `0xB`  -> `OR`
-- `0xC`  -> `AND`
-- `0xD`  -> `CMP`
-- `0xE`  -> `JUMP [status flag]`
-- `0xF`  -> `DIN [device flag] [reg flag2]`
-- `0x10` -> `DOUT [device flag] [reg flag2]`
+- `0x6`  -> `ADD [reg flag] [reg flag]`
+- `0x7`  -> `ADC [reg flag] [reg flag]`
+- `0x8`  -> `SUB [reg flag] [reg flag]`
+- `0x9`  -> `SBB [reg flag] [reg flag]`
+- `0xA`  -> `NOT [reg flag]`
+- `0xB`  -> `OR [reg flag] [reg flag]`
+- `0xC`  -> `AND [reg flag] [reg flag]`
+- `0xD`  -> `CMP [reg flag] [reg flag]`
+- `0xE`  -> `JUMP [status flag] [mem addr]`
+- `0xF`  -> `DIN [device flag] [reg flag]`
+- `0x10` -> `DOUT [device flag] [reg flag]`
 - `0x11` -> `HLT`
 
 *`0x1` and `0x3` are the same as `0x0` and `0x2` respectively
