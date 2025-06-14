@@ -29,21 +29,24 @@ Custom CPU Architecture and emulator for that architecture made for fun!
 
 - `0x0`  -> `LOAD [reg flag] [mem addr]`
 - `0x1`  -> `DUMP [reg flag] [mem addr]`
-- `0x2`  -> `LDD [reg flag] [data]`
-- `0x3`  -> `PUSH [reg flag]`
-- `0x4`  -> `POP [reg flag]`
-- `0x5`  -> `ADD`
-- `0x6`  -> `ADC`
-- `0x7`  -> `SUB`
-- `0x8`  -> `SBB`
-- `0x9`  -> `NOT`
-- `0xA`  -> `OR`
-- `0xB`  -> `AND`
-- `0xC`  -> `CMP`
-- `0xD`  -> `JUMP [status flag]`
-- `0xE`  -> `DIN [device flag] [reg flag2]`
-- `0xF`  -> `DOUT [device flag] [reg flag2]`
-- `0x10` -> `HLT`
+- `0x2`  -> `MOVE [reg flag] [reg flag]`*
+- `0x3`  -> `LDD [reg flag] [data]`*
+- `0x4`  -> `PUSH [reg flag]`
+- `0x5`  -> `POP [reg flag]`
+- `0x6`  -> `ADD`
+- `0x7`  -> `ADC`
+- `0x8`  -> `SUB`
+- `0x9`  -> `SBB`
+- `0xA`  -> `NOT`
+- `0xB`  -> `OR`
+- `0xC`  -> `AND`
+- `0xD`  -> `CMP`
+- `0xE`  -> `JUMP [status flag]`
+- `0xF`  -> `DIN [device flag] [reg flag2]`
+- `0x10` -> `DOUT [device flag] [reg flag2]`
+- `0x11` -> `HLT`
+
+*`0x1` and `0x3` are the same as `0x0` and `0x2` respectively
 
 ### Register Flags
 
