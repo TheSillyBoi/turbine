@@ -14,7 +14,9 @@
 #define RAM_END 0xFFFE
 
 typedef struct VirtualMachine {
-  uint16_t general_register;
+  uint16_t register_a;
+  uint16_t register_b;
+  uint16_t accumulator;
   uint16_t stack_pointer;
   uint16_t base_pointer;
   uint16_t instruction_pointer;

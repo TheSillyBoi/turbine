@@ -15,7 +15,9 @@ VirtualMachine init_vm() {
   VirtualMachine vm = {0};
   vm.base_pointer = RAM_END;
   vm.stack_pointer = RAM_END;
-  vm.general_register = 0x0;
+  vm.register_a = 0x0;
+  vm.register_b = 0x0;
+  vm.accumulator = 0x0;
   vm.instruction_pointer = 0x0;
   vm.flags_register = 0x0;
   vm.halted = false;
@@ -53,10 +55,6 @@ void init_data_vm(VirtualMachine *vm, uint8_t *data, uint16_t size) {
 }
 
 void step_vm(VirtualMachine *vm) {
-  if (vm->instruction_pointer >= MEMORY_SIZE) {
-    printf("[vm] PROGRAM END\n");
-    vm->halted = true;
-  }
   switch (vm->memory[vm->instruction_pointer++]) {
   case LOAD: {
     uint8_t flag = vm->memory[vm->instruction_pointer++];
@@ -65,19 +63,26 @@ void step_vm(VirtualMachine *vm) {
     uint16_t data = u16_combine(left, right);
     switch (flag) {
     case 0x0: {
-      vm->general_register = vm->memory[data];
+      vm->register_a = vm->memory[data];
       break;
     }
     case 0x1: {
-      vm->general_register =
-          u16_combine(vm->memory[data], vm->memory[data + 1]);
+      vm->register_a = u16_combine(vm->memory[data], vm->memory[data + 1]);
       break;
     }
     case 0x2: {
-      vm->stack_pointer = u16_combine(vm->memory[data], vm->memory[data + 1]);
+      vm->register_b = vm->memory[data];
       break;
     }
     case 0x3: {
+      vm->register_a = u16_combine(vm->memory[data], vm->memory[data + 1]);
+      break;
+    }
+    case 0x4: {
+      vm->stack_pointer = u16_combine(vm->memory[data], vm->memory[data + 1]);
+      break;
+    }
+    case 0x5: {
       vm->base_pointer = u16_combine(vm->memory[data], vm->memory[data + 1]);
       break;
     }
@@ -94,35 +99,33 @@ void step_vm(VirtualMachine *vm) {
     right = 0;
     switch (flag) {
     case 0x0: {
-      vm->memory[data] = vm->general_register;
+      vm->memory[data] = vm->register_a;
       break;
     }
     case 0x1: {
-      u16_split(vm->general_register, &left, &right);
+      u16_split(vm->register_a, &left, &right);
       vm->memory[data] = left;
       vm->memory[data + 1] = right;
       break;
     }
     case 0x2: {
+      vm->memory[data] = vm->register_b;
+      break;
+    }
+    case 0x3: {
       u16_split(vm->stack_pointer, &left, &right);
       vm->memory[data] = left;
       vm->memory[data + 1] = right;
       break;
     }
-    case 0x3: {
+    case 0x4: {
       u16_split(vm->base_pointer, &left, &right);
       vm->memory[data] = left;
       vm->memory[data + 1] = right;
       break;
     }
-    case 0x4: {
-      u16_split(vm->instruction_pointer, &left, &right);
-      vm->memory[data] = left;
-      vm->memory[data + 1] = right;
-      break;
-    }
     case 0x5: {
-      u16_split(vm->flags_register, &left, &right);
+      u16_split(vm->instruction_pointer, &left, &right);
       vm->memory[data] = left;
       vm->memory[data + 1] = right;
       break;
@@ -137,7 +140,7 @@ void step_vm(VirtualMachine *vm) {
     uint16_t data = u16_combine(left, right);
     switch (flag) {
     case 0x0: {
-      vm->general_register = data;
+      vm->register_a = data;
       break;
     }
     case 0x1: {
@@ -167,17 +170,17 @@ void step_vm(VirtualMachine *vm) {
     uint8_t right = 0;
     switch (flag) {
     case 0x0: {
-      u16_split(vm->general_register, &left, &right);
+      u16_split(vm->register_a, &left, &right);
       vm->memory[vm->stack_pointer--] = left;
       break;
     }
     case 0x1: {
-      u16_split(vm->general_register, &left, &right);
+      u16_split(vm->register_a, &left, &right);
       vm->memory[vm->stack_pointer--] = right;
       break;
     }
     case 0x2: {
-      u16_split(vm->general_register, &left, &right);
+      u16_split(vm->register_a, &left, &right);
       vm->memory[vm->stack_pointer--] = left;
       vm->memory[vm->stack_pointer--] = right;
       break;
@@ -214,13 +217,13 @@ void step_vm(VirtualMachine *vm) {
     if (vm->stack_pointer < RAM_END) {
       switch (flag) {
       case 0x0: {
-        vm->general_register = vm->memory[vm->stack_pointer + 1];
+        vm->register_a = vm->memory[vm->stack_pointer + 1];
         vm->stack_pointer += 1;
         break;
       }
       case 0x1: {
-        vm->general_register = u16_combine(vm->memory[vm->stack_pointer + 1],
-                                           vm->memory[vm->stack_pointer + 2]);
+        vm->register_a = u16_combine(vm->memory[vm->stack_pointer + 1],
+                                     vm->memory[vm->stack_pointer + 2]);
         vm->stack_pointer += 2;
         break;
       }
@@ -257,9 +260,9 @@ void step_vm(VirtualMachine *vm) {
     uint8_t left = vm->memory[vm->instruction_pointer++];
     uint8_t right = vm->memory[vm->instruction_pointer++];
     uint16_t data = vm->memory[u16_combine(left, right)];
-    uint16_t result = vm->general_register + data;
+    uint16_t result = vm->register_a + data;
 
-    vm->general_register = (uint8_t)result;
+    vm->register_a = (uint8_t)result;
     vm->flags_register = (result > UINT8_MAX);
 
     break;
@@ -268,9 +271,9 @@ void step_vm(VirtualMachine *vm) {
     uint8_t left = vm->memory[vm->instruction_pointer++];
     uint8_t right = vm->memory[vm->instruction_pointer++];
     uint16_t data = vm->memory[u16_combine(left, right)];
-    uint16_t result = vm->general_register + data + vm->flags_register;
+    uint16_t result = vm->register_a + data + vm->flags_register;
 
-    vm->general_register = (uint8_t)result;
+    vm->register_a = (uint8_t)result;
     vm->flags_register = (result > UINT8_MAX);
 
     break;
@@ -280,8 +283,8 @@ void step_vm(VirtualMachine *vm) {
     uint8_t right = vm->memory[vm->instruction_pointer++];
     uint16_t data = vm->memory[u16_combine(left, right)];
 
-    uint8_t original = vm->general_register;
-    vm->general_register = vm->general_register - data;
+    uint8_t original = vm->register_a;
+    vm->register_a = vm->register_a - data;
     vm->flags_register = (original > data);
 
     break;
@@ -292,10 +295,10 @@ void step_vm(VirtualMachine *vm) {
     uint8_t right = vm->memory[vm->instruction_pointer++];
     uint16_t data = vm->memory[u16_combine(left, right)];
     uint8_t borrow_in = vm->flags_register ? 1 : 0;
-    uint8_t temp = vm->general_register - data;
+    uint8_t temp = vm->register_a - data;
 
-    bool borrowed = vm->general_register < data;
-    vm->general_register = temp - borrow_in;
+    bool borrowed = vm->register_a < data;
+    vm->register_a = temp - borrow_in;
 
     bool borrowed_from_borrow = temp < borrow_in;
     vm->flags_register = borrowed || borrowed_from_borrow;
@@ -306,18 +309,18 @@ void step_vm(VirtualMachine *vm) {
     uint8_t left = vm->memory[vm->instruction_pointer++];
     uint8_t right = vm->memory[vm->instruction_pointer++];
     uint16_t data = vm->memory[u16_combine(left, right)];
-    if (vm->general_register < data) {
+    if (vm->register_a < data) {
       vm->flags_register = 0x0;
-    } else if (vm->general_register == data) {
+    } else if (vm->register_a == data) {
       vm->flags_register = 0x1;
-    } else if (vm->general_register > data) {
+    } else if (vm->register_a > data) {
       vm->flags_register = 0x2;
     }
 
     break;
   }
   case JNZ: {
-    if (vm->general_register != 0x0) {
+    if (vm->register_a != 0x0) {
       vm->instruction_pointer = vm->memory[vm->instruction_pointer];
     } else {
       vm->instruction_pointer++;
@@ -328,21 +331,21 @@ void step_vm(VirtualMachine *vm) {
     uint8_t left = vm->memory[vm->instruction_pointer++];
     uint8_t right = vm->memory[vm->instruction_pointer++];
     uint16_t data = vm->memory[u16_combine(left, right)];
-    vm->general_register = vm->general_register & data;
+    vm->register_a = vm->register_a & data;
     break;
   }
   case NOT: {
     uint8_t left = vm->memory[vm->instruction_pointer++];
     uint8_t right = vm->memory[vm->instruction_pointer++];
     uint16_t data = vm->memory[u16_combine(left, right)];
-    vm->general_register = ~data;
+    vm->register_a = ~data;
     break;
   }
   case OR: {
     uint8_t left = vm->memory[vm->instruction_pointer++];
     uint8_t right = vm->memory[vm->instruction_pointer++];
     uint16_t data = vm->memory[u16_combine(left, right)];
-    vm->general_register = vm->general_register | data;
+    vm->register_a = vm->register_a | data;
     break;
   }
   case DIN: {
@@ -351,14 +354,14 @@ void step_vm(VirtualMachine *vm) {
     switch (flag2) {
     case 0x0: {
       if (flag1 < DEVICES_LENGTH)
-        vm->devices[flag2].in(vm->general_register);
+        vm->devices[flag2].in(vm->register_a);
       break;
     }
     case 0x1: {
       if (flag1 < DEVICES_LENGTH) {
         uint8_t left = 0;
         uint8_t right = 0;
-        u16_split(vm->general_register, &left, &right);
+        u16_split(vm->register_a, &left, &right);
         vm->devices[flag1].in(left);
         vm->devices[flag1].in(right);
       }
@@ -382,7 +385,7 @@ void step_vm(VirtualMachine *vm) {
 }
 
 void debug_print_vm(VirtualMachine *vm) {
-  printf("General Register: 0x%x\n", vm->general_register);
+  printf("General Register: 0x%x\n", vm->register_a);
   printf("Instruction Pointer: 0x%x\n", vm->instruction_pointer);
   printf("Stack Pointer: 0x%x\n", vm->stack_pointer);
   printf("Base Pointer: 0x%x\n", vm->base_pointer);

@@ -1,0 +1,12 @@
+#ifndef INCLUDE_SRC_STATUS_H_
+#define INCLUDE_SRC_STATUS_H_
+
+enum Flag {
+  CMP_EQUAL_TO = 0x0,
+  CMP_GREATER_THAN = 0x1,
+  CMP_LESS_THAN = 0x2,
+  ADD_CARRY = 0x3,
+  SUB_BORROW = 0x4,
+};
+
+#endif // INCLUDE_SRC_STATUS_H_
