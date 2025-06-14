@@ -40,7 +40,7 @@ Custom CPU Architecture and emulator for that architecture made for fun!
 - `0xA`  -> `OR`
 - `0xB`  -> `AND`
 - `0xC`  -> `CMP`
-- `0xD`  -> `JNZ`
+- `0xD`  -> `JUMP [status flag]`
 - `0xE`  -> `DIN [device flag] [reg flag2]`
 - `0xF`  -> `DOUT [device flag] [reg flag2]`
 - `0x10` -> `HLT`
@@ -62,9 +62,6 @@ Custom CPU Architecture and emulator for that architecture made for fun!
 - `0x1` -> Screen
 
 ### Status Flags
-
-Aren't to be confused with argument flags for instructions.
-These are the different statuses that the status register can hold.
 
 - `0x0` -> `CMP_EQUAL_TO`     -> When `CMP` finds both registers equal to each other
 - `0x1` -> `CMP_GREATER_THAN` -> When `CMP` finds register a greater than b
