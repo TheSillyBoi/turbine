@@ -16,6 +16,7 @@ Custom CPU Architecture and emulator for that architecture made for fun!
 - `rsp` -> Stack Pointer
 - `rbp` -> Base Pointer
 - `rpc` -> Instruction Pointer
+- `rac` -> Accumulator
 - `rfl` -> Status Register
 
 ## Memory
@@ -26,38 +27,47 @@ Custom CPU Architecture and emulator for that architecture made for fun!
 
 ## Instructions
 
-| Opcode |  Name  | Description |
-| :----- | :----- | :---------- |
-| `0x0`  | `LOAD` | Load data into a register from memory. |
-| `0x1`  | `DUMP` | Dump data off the register into memory. |
-| `0x2`  | `LDD`  | Loads data specified into the register. Data is two bytes. |
-| `0x3`  | `PUSH` | Push data onto the stack from register and adjusts RSP. |
-| `0x4`  | `POP`  | Pop data off the stack into the register and adjusts RSP. Flag determines whether to pop off one or two bytes. |
-| `0x5`  | `ADD`  | Add both general registers (without carrying) and save to accumulator, setting appropriate flags in status register. |
-| `0x6`  | `ADC`  | Add both general registers and save to accumulator, setting appropriate flags in status register. |
-| `0x7`  | `SUB`  | Subtract both general registers (without borrowing) and save to accumulator, setting appropriate flags in status register. |
-| `0x8`  | `SBB`  | Subtract both general registers and save to accumulator, setting appropriate flags in status register. |
-| `0x9`  | `CMP`  | Compare data from memory and checks if register data is greater than, less than, or equal to data from register. Dumps result to flags register. |
-| `0xA`  | `JNZ`  | Jumps the instruction pointer to the given memory address if register is not zero. |
-| `0xB`  | `AND`  | Bitwise AND with register and given memory address. |
-| `0xC`  | `NOT`  | NOT with given memory address. |
-| `0xD`  | `OR`   | Bitwise OR with register and given memory address. |
-| `0xE`  | `DIN`  | Using ID of external device from flag, dump data from general register into device where second flag determines how many bytes. |
-| `0xF`  | `DOUT` | Using ID of external device from flag, dump data from device into general register where second flag determines how many bytes. |
-| `0x10` | `HLT`  | Halts the machine. |
+- `0x0`  -> `LOAD [reg flag] [mem addr]`
+- `0x1`  -> `DUMP [reg flag] [mem addr]`
+- `0x2`  -> `LDD [reg flag] [data]`
+- `0x3`  -> `PUSH [reg flag]`
+- `0x4`  -> `POP [reg flag]`
+- `0x5`  -> `ADD`
+- `0x6`  -> `ADC`
+- `0x7`  -> `SUB`
+- `0x8`  -> `SBB`
+- `0x9`  -> `NOT`
+- `0xA`  -> `OR`
+- `0xB`  -> `AND`
+- `0xC`  -> `CMP`
+- `0xD`  -> `JNZ`
+- `0xE`  -> `DIN [device flag] [reg flag2]`
+- `0xF`  -> `DOUT [device flag] [reg flag2]`
+- `0x10` -> `HLT`
 
 ### Register Flags
 
-- `0x0` -> 1 byte to register A
-- `0x1` -> 2 bytes to register A
-- `0x2` -> 1 byte to register B
-- `0x3` -> 2 bytes to register B
-- `0x4` -> 2 bytes to stack pointer*
-- `0x5` -> 2 bytes to base pointer*
+- `0x0` -> `RA_BYTE`      -> 1 byte to register A
+- `0x1` -> `RA_TWO_BYTES` -> 2 bytes to register A
+- `0x2` -> `RB_BYTE`      -> 1 byte to register B
+- `0x3` -> `RB_TWO_BYTES` -> 2 bytes to register B
+- `0x4` -> `STACK_PTR`    -> 2 bytes to stack pointer
+- `0x5` -> `BASE_PTR`     -> 2 bytes to base pointer
+- `0x6` -> `ACCUMULATOR`  -> 1 byte to accumulator
+- `0x7` -> `STATUS`       -> Status flag(1 byte) to status register
+
+### Device Flags
+
+- `0x0` -> Console
+- `0x1` -> Screen
 
 ### Status Flags
 
-Flags that can be set in the status register. Not to be confused with flag arguements
+Aren't to be confused with argument flags for instructions.
+These are the different statuses that the status register can hold.
 
-*Only two byte versions exist since it's pointless to load
- just one byte to something that only should store 16-bit memory addresses
+- `0x0` -> `CMP_EQUAL_TO`     -> When `CMP` finds both registers equal to each other
+- `0x1` -> `CMP_GREATER_THAN` -> When `CMP` finds register a greater than b
+- `0x2` -> `CMP_LESS_THAN`    -> When `CMP` finds register a less than b
+- `0x3` -> `ADD_CARRY`        -> When `ADC` or `ADD` set a carry flag
+- `0x3` -> `SUB_BORROW`       -> When `SBB` or `SUB` set a carry flag
