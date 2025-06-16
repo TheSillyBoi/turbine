@@ -13,6 +13,9 @@ Custom CPU Architecture and emulator for that architecture made for fun!
 
 - `ra`  -> General Purpose Register
 - `rb`  -> General Purpose Register
+- `rc`  -> General Purpose Register
+- `rd`  -> General Purpose Register
+- `re`  -> General Purpose Register
 - `rsp` -> Stack Pointer
 - `rbp` -> Base Pointer
 - `rpc` -> Instruction Pointer
