@@ -54,10 +54,16 @@ Custom CPU Architecture and emulator for that architecture made for fun!
 - `0x1` -> `RA_TWO_BYTES` -> 2 bytes to register A
 - `0x2` -> `RB_BYTE`      -> 1 byte to register B
 - `0x3` -> `RB_TWO_BYTES` -> 2 bytes to register B
-- `0x4` -> `STACK_PTR`    -> 2 bytes to stack pointer
-- `0x5` -> `BASE_PTR`     -> 2 bytes to base pointer
-- `0x6` -> `ACCUMULATOR`  -> 1 byte to accumulator
-- `0x7` -> `STATUS`       -> Status flag(1 byte) to status register
+- `0x4` -> `RC_BYTE`      -> 1 byte to register C
+- `0x5` -> `RC_TWO_BYTES` -> 2 bytes to register C
+- `0x6` -> `RD_BYTE`      -> 1 byte to register D
+- `0x7` -> `RD_TWO_BYTES` -> 2 bytes to register D
+- `0x8` -> `RE_BYTE`      -> 1 byte to register E
+- `0x9` -> `RE_TWO_BYTES` -> 2 bytes to register E
+- `0xa` -> `STACK_PTR`    -> 2 bytes to stack pointer
+- `0xb` -> `BASE_PTR`     -> 2 bytes to base pointer
+- `0xc` -> `ACCUMULATOR`  -> 1 byte to accumulator
+- `0xd` -> `STATUS`       -> Status flag(1 byte) to status register
 
 ### Device Flags
 
@@ -70,4 +76,6 @@ Custom CPU Architecture and emulator for that architecture made for fun!
 - `0x1` -> `CMP_GREATER_THAN` -> When `CMP` finds register a greater than b
 - `0x2` -> `CMP_LESS_THAN`    -> When `CMP` finds register a less than b
 - `0x3` -> `ADD_CARRY`        -> When `ADC` or `ADD` set a carry flag
-- `0x3` -> `SUB_BORROW`       -> When `SBB` or `SUB` set a carry flag
+- `0x4` -> `ADD_NO_CARRY`     -> When `ADC` or `ADD` don't set a carry flag
+- `0x5` -> `SUB_BORROW`       -> When `SBB` or `SUB` set a carry flag
+- `0x6` -> `SUB_NO_BORROW`    -> When `SBB` or `SUB` don't set a carry flag

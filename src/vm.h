@@ -17,6 +17,9 @@
 typedef struct VirtualMachine {
   uint16_t register_a;
   uint16_t register_b;
+  uint16_t register_c;
+  uint16_t register_d;
+  uint16_t register_e;
   uint16_t stack_pointer;
   uint16_t base_pointer;
   uint16_t accumulator;
