@@ -2,7 +2,7 @@ SRC_DIR = src
 BUILD_DIR = build
 EXE = turbine
 
-SRC = main.c vm.c util.c device.c buffer.c
+SRC = main.c vm.c util.c device.c
 OBJ = $(SRC:%.c=$(BUILD_DIR)/%.o)
 
 CFLAGS += -std=c23 -Wall -Wextra -Werror -pedantic
