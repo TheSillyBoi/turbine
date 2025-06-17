@@ -57,178 +57,74 @@ void step_vm(VirtualMachine *vm) {
   switch (vm->memory[vm->instruction_pointer++]) {
   case LOAD: {
     printf("LOAD\n");
-    uint8_t reg_flag = vm->memory[vm->instruction_pointer++];
-    uint8_t left_mem_addr = vm->memory[vm->instruction_pointer++];
-    uint8_t right_mem_addr = vm->memory[vm->instruction_pointer++];
-    uint8_t mem_addr = u16_combine(left_mem_addr, right_mem_addr);
-
-    switch (reg_flag) {
-    case RA_BYTE: {
-      vm->register_a = vm->memory[mem_addr];
-      break;
-    }
-    case RA_TWO_BYTES: {
-      vm->register_a =
-          u16_combine(vm->memory[mem_addr], vm->memory[mem_addr + 1]);
-      break;
-    }
-    case RB_BYTE: {
-      vm->register_b = vm->memory[mem_addr];
-      break;
-    }
-    case RB_TWO_BYTES: {
-      vm->register_b =
-          u16_combine(vm->memory[mem_addr], vm->memory[mem_addr + 1]);
-      break;
-    }
-    case RC_BYTE: {
-      vm->register_c = vm->memory[mem_addr];
-      break;
-    }
-    case RC_TWO_BYTES: {
-      vm->register_c =
-          u16_combine(vm->memory[mem_addr], vm->memory[mem_addr + 1]);
-      break;
-    }
-    case RD_BYTE: {
-      vm->register_d = vm->memory[mem_addr];
-      break;
-    }
-    case RD_TWO_BYTES: {
-      vm->register_d =
-          u16_combine(vm->memory[mem_addr], vm->memory[mem_addr + 1]);
-      break;
-    }
-    case RE_BYTE: {
-      vm->register_e = vm->memory[mem_addr];
-      break;
-    }
-    case RE_TWO_BYTES: {
-      vm->register_e =
-          u16_combine(vm->memory[mem_addr], vm->memory[mem_addr + 1]);
-      break;
-    }
-    case STACK_PTR: {
-      vm->stack_pointer =
-          u16_combine(vm->memory[mem_addr], vm->memory[mem_addr + 1]);
-      break;
-    }
-    case BASE_PTR: {
-      vm->base_pointer =
-          u16_combine(vm->memory[mem_addr], vm->memory[mem_addr + 1]);
-      break;
-    }
-    case ACCUMULATOR: {
-      vm->accumulator =
-          u16_combine(vm->memory[mem_addr], vm->memory[mem_addr + 1]);
-      break;
-    }
+    uint16_t *reg = NULL;
+    reg_flag_parser(vm, &reg);
+    switch (vm->memory[vm->instruction_pointer - 1]) {
+    case RA_BYTE:
+    case RB_BYTE:
+    case RC_BYTE:
+    case RD_BYTE:
+    case RE_BYTE:
     case STATUS: {
-      vm->status_register = vm->memory[mem_addr];
+      uint8_t left = vm->memory[vm->instruction_pointer++];
+      uint8_t right = vm->memory[vm->instruction_pointer++];
+      *reg = vm->memory[u16_combine(left, right)];
+      break;
+    }
+    case RA_TWO_BYTES:
+    case RB_TWO_BYTES:
+    case RC_TWO_BYTES:
+    case RD_TWO_BYTES:
+    case RE_TWO_BYTES:
+    case STACK_PTR:
+    case BASE_PTR:
+    case ACCUMULATOR: {
+      uint8_t left = vm->memory[vm->instruction_pointer++];
+      uint8_t right = vm->memory[vm->instruction_pointer++];
+      uint16_t memory = u16_combine(left, right);
+      uint8_t left_data = vm->memory[memory];
+      uint8_t right_data = vm->memory[memory + 1];
+      *reg = u16_combine(left_data, right_data);
       break;
     }
     }
-
     break;
   }
   case DUMP: {
     printf("DUMP\n");
-    uint8_t reg_flag = vm->memory[vm->instruction_pointer++];
-    uint8_t left_mem_addr = vm->memory[vm->instruction_pointer++];
-    uint8_t right_mem_addr = vm->memory[vm->instruction_pointer++];
-    uint8_t mem_addr = u16_combine(left_mem_addr, right_mem_addr);
-
-    switch (reg_flag) {
-    case RA_BYTE: {
-      vm->memory[mem_addr] = vm->register_a;
-      break;
-    }
-    case RA_TWO_BYTES: {
-      uint8_t left = 0;
-      uint8_t right = 0;
-      u16_split(vm->register_a, &left, &right);
-      vm->memory[mem_addr] = left;
-      vm->memory[mem_addr + 1] = right;
-      break;
-    }
-    case RB_BYTE: {
-      vm->memory[mem_addr] = vm->register_b;
-      break;
-    }
-    case RB_TWO_BYTES: {
-      uint8_t left = 0;
-      uint8_t right = 0;
-      u16_split(vm->register_b, &left, &right);
-      vm->memory[mem_addr] = left;
-      vm->memory[mem_addr + 1] = right;
-      break;
-    }
-    case RC_BYTE: {
-      vm->memory[mem_addr] = vm->register_c;
-      break;
-    }
-    case RC_TWO_BYTES: {
-      uint8_t left = 0;
-      uint8_t right = 0;
-      u16_split(vm->register_c, &left, &right);
-      vm->memory[mem_addr] = left;
-      vm->memory[mem_addr + 1] = right;
-      break;
-    }
-    case RD_BYTE: {
-      vm->memory[mem_addr] = vm->register_d;
-      break;
-    }
-    case RD_TWO_BYTES: {
-      uint8_t left = 0;
-      uint8_t right = 0;
-      u16_split(vm->register_d, &left, &right);
-      vm->memory[mem_addr] = left;
-      vm->memory[mem_addr + 1] = right;
-      break;
-    }
-    case RE_BYTE: {
-      vm->memory[mem_addr] = vm->register_e;
-      break;
-    }
-    case RE_TWO_BYTES: {
-      uint8_t left = 0;
-      uint8_t right = 0;
-      u16_split(vm->register_e, &left, &right);
-      vm->memory[mem_addr] = left;
-      vm->memory[mem_addr + 1] = right;
-      break;
-    }
-    case STACK_PTR: {
-      uint8_t left = 0;
-      uint8_t right = 0;
-      u16_split(vm->stack_pointer, &left, &right);
-      vm->memory[mem_addr] = left;
-      vm->memory[mem_addr + 1] = right;
-      break;
-    }
-    case BASE_PTR: {
-      uint8_t left = 0;
-      uint8_t right = 0;
-      u16_split(vm->base_pointer, &left, &right);
-      vm->memory[mem_addr] = left;
-      vm->memory[mem_addr + 1] = right;
-      break;
-    }
-    case ACCUMULATOR: {
-      uint8_t left = 0;
-      uint8_t right = 0;
-      u16_split(vm->accumulator, &left, &right);
-      vm->memory[mem_addr] = left;
-      vm->memory[mem_addr + 1] = right;
-      break;
-    }
+    uint16_t *reg = NULL;
+    reg_flag_parser(vm, &reg);
+    switch (vm->memory[vm->instruction_pointer - 1]) {
+    case RA_BYTE:
+    case RB_BYTE:
+    case RC_BYTE:
+    case RD_BYTE:
+    case RE_BYTE:
     case STATUS: {
-      vm->memory[mem_addr] = vm->status_register;
+      uint8_t left = vm->memory[vm->instruction_pointer++];
+      uint8_t right = vm->memory[vm->instruction_pointer++];
+      vm->memory[u16_combine(left, right)] = *reg;
+      break;
+    }
+    case RA_TWO_BYTES:
+    case RB_TWO_BYTES:
+    case RC_TWO_BYTES:
+    case RD_TWO_BYTES:
+    case RE_TWO_BYTES:
+    case STACK_PTR:
+    case BASE_PTR:
+    case ACCUMULATOR: {
+      uint8_t left_mem = vm->memory[vm->instruction_pointer++];
+      uint8_t right_mem = vm->memory[vm->instruction_pointer++];
+      uint8_t memory_addr = u16_combine(left_mem, right_mem);
+      uint8_t left_reg = 0;
+      uint8_t right_reg = 0;
+      u16_split(*reg, &left_reg, &right_mem);
+      vm->memory[memory_addr] = left_reg;
+      vm->memory[memory_addr + 1] = right_reg;
       break;
     }
     }
-
     break;
   }
   case MOVE: {
@@ -245,78 +141,29 @@ void step_vm(VirtualMachine *vm) {
   }
   case LDD: {
     printf("LDD\n");
-    switch (vm->memory[vm->instruction_pointer++]) {
-    case RA_BYTE: {
-      vm->register_a = vm->memory[vm->instruction_pointer++];
+    uint16_t *reg = NULL;
+    reg_flag_parser(vm, &reg);
+    switch (vm->memory[vm->instruction_pointer - 1]) {
+    case RA_BYTE:
+    case RB_BYTE:
+    case RC_BYTE:
+    case RD_BYTE:
+    case RE_BYTE:
+    case STATUS: {
+      *reg = vm->memory[vm->instruction_pointer++];
       break;
     }
-    case RA_TWO_BYTES: {
-      uint8_t left = vm->memory[vm->instruction_pointer++];
-      uint8_t right = vm->memory[vm->instruction_pointer++];
-      vm->register_a = u16_combine(left, right);
-      break;
-    }
-    case RB_BYTE: {
-      vm->register_b = vm->memory[vm->instruction_pointer++];
-      break;
-    }
-    case RB_TWO_BYTES: {
-      uint8_t left = vm->memory[vm->instruction_pointer++];
-      uint8_t right = vm->memory[vm->instruction_pointer++];
-      vm->register_b = u16_combine(left, right);
-      break;
-    }
-    case RC_BYTE: {
-      vm->register_c = vm->memory[vm->instruction_pointer++];
-      break;
-    }
-    case RC_TWO_BYTES: {
-      uint8_t left = vm->memory[vm->instruction_pointer++];
-      uint8_t right = vm->memory[vm->instruction_pointer++];
-      vm->register_c = u16_combine(left, right);
-      break;
-    }
-    case RD_BYTE: {
-      vm->register_d = vm->memory[vm->instruction_pointer++];
-      break;
-    }
-    case RD_TWO_BYTES: {
-      uint8_t left = vm->memory[vm->instruction_pointer++];
-      uint8_t right = vm->memory[vm->instruction_pointer++];
-      vm->register_d = u16_combine(left, right);
-      break;
-    }
-    case RE_BYTE: {
-      vm->register_e = vm->memory[vm->instruction_pointer++];
-      break;
-    }
-    case RE_TWO_BYTES: {
-      uint8_t left = vm->memory[vm->instruction_pointer++];
-      uint8_t right = vm->memory[vm->instruction_pointer++];
-      vm->register_e = u16_combine(left, right);
-      break;
-    }
-    case STACK_PTR: {
-      uint8_t left = vm->memory[vm->instruction_pointer++];
-      uint8_t right = vm->memory[vm->instruction_pointer++];
-      vm->stack_pointer = u16_combine(left, right);
-      break;
-    }
-    case BASE_PTR: {
-      uint8_t left = vm->memory[vm->instruction_pointer++];
-      uint8_t right = vm->memory[vm->instruction_pointer++];
-      vm->base_pointer = u16_combine(left, right);
-      break;
-    }
+    case RA_TWO_BYTES:
+    case RB_TWO_BYTES:
+    case RC_TWO_BYTES:
+    case RD_TWO_BYTES:
+    case RE_TWO_BYTES:
+    case STACK_PTR:
+    case BASE_PTR:
     case ACCUMULATOR: {
       uint8_t left = vm->memory[vm->instruction_pointer++];
       uint8_t right = vm->memory[vm->instruction_pointer++];
-      vm->accumulator = u16_combine(left, right);
-      break;
-    }
-    case STATUS: {
-      vm->status_register = vm->memory[vm->instruction_pointer];
-      break;
+      *reg = u16_combine(left, right);
     }
     }
     break;
@@ -324,180 +171,60 @@ void step_vm(VirtualMachine *vm) {
   // left first, right last for push and reverse for pop
   case PUSH: {
     printf("PUSH\n");
-    switch (vm->memory[vm->instruction_pointer++]) {
-    case RA_BYTE: {
-      vm->memory[vm->stack_pointer--] = vm->register_a;
+    uint16_t *reg = NULL;
+    reg_flag_parser(vm, &reg);
+    switch (vm->memory[vm->instruction_pointer - 1]) {
+    case RA_BYTE:
+    case RB_BYTE:
+    case RC_BYTE:
+    case RD_BYTE:
+    case RE_BYTE:
+    case STATUS: {
+      vm->memory[vm->stack_pointer--] = *reg;
       break;
     }
-    case RA_TWO_BYTES: {
-      uint8_t left = 0;
-      uint8_t right = 0;
-      u16_split(vm->register_a, &left, &right);
-      vm->memory[vm->stack_pointer--] = left;
-      vm->memory[vm->stack_pointer--] = right;
-      break;
-    }
-    case RB_BYTE: {
-      vm->memory[vm->stack_pointer] = vm->register_b;
-      break;
-    }
-    case RB_TWO_BYTES: {
-      uint8_t left = 0;
-      uint8_t right = 0;
-      u16_split(vm->register_b, &left, &right);
-      vm->memory[vm->stack_pointer--] = left;
-      vm->memory[vm->stack_pointer--] = right;
-      break;
-    }
-    case RC_BYTE: {
-      vm->memory[vm->stack_pointer] = vm->register_c;
-      break;
-    }
-    case RC_TWO_BYTES: {
-      uint8_t left = 0;
-      uint8_t right = 0;
-      u16_split(vm->register_c, &left, &right);
-      vm->memory[vm->stack_pointer--] = left;
-      vm->memory[vm->stack_pointer--] = right;
-      break;
-    }
-    case RD_BYTE: {
-      vm->memory[vm->stack_pointer] = vm->register_d;
-      break;
-    }
-    case RD_TWO_BYTES: {
-      uint8_t left = 0;
-      uint8_t right = 0;
-      u16_split(vm->register_d, &left, &right);
-      vm->memory[vm->stack_pointer--] = left;
-      vm->memory[vm->stack_pointer--] = right;
-      break;
-    }
-    case RE_BYTE: {
-      vm->memory[vm->stack_pointer] = vm->register_e;
-      break;
-    }
-    case RE_TWO_BYTES: {
-      uint8_t left = 0;
-      uint8_t right = 0;
-      u16_split(vm->register_e, &left, &right);
-      vm->memory[vm->stack_pointer--] = left;
-      vm->memory[vm->stack_pointer--] = right;
-      break;
-    }
-    case STACK_PTR: {
+    case RA_TWO_BYTES:
+    case RB_TWO_BYTES:
+    case RC_TWO_BYTES:
+    case RD_TWO_BYTES:
+    case RE_TWO_BYTES:
+    case STACK_PTR:
+    case BASE_PTR:
+    case ACCUMULATOR: {
       uint8_t left = 0;
       uint8_t right = 0;
       u16_split(vm->stack_pointer, &left, &right);
       vm->memory[vm->stack_pointer--] = left;
       vm->memory[vm->stack_pointer--] = right;
-      break;
-    }
-    case BASE_PTR: {
-      uint8_t left = 0;
-      uint8_t right = 0;
-      u16_split(vm->base_pointer, &left, &right);
-      vm->memory[vm->stack_pointer--] = left;
-      vm->memory[vm->stack_pointer--] = right;
-      break;
-    }
-    case ACCUMULATOR: {
-      uint8_t left = 0;
-      uint8_t right = 0;
-      u16_split(vm->accumulator, &left, &right);
-      vm->memory[vm->stack_pointer--] = left;
-      vm->memory[vm->stack_pointer--] = right;
-      break;
-    }
-    case STATUS: {
-      vm->memory[vm->stack_pointer--] = vm->status_register;
-      break;
     }
     }
     break;
   }
   case POP: {
     printf("POP\n");
-    switch (vm->memory[vm->instruction_pointer++]) {
-    case RA_BYTE: {
-      vm->register_a = vm->memory[++vm->stack_pointer];
+    uint16_t *reg = NULL;
+    reg_flag_parser(vm, &reg);
+    switch (vm->memory[vm->instruction_pointer - 1]) {
+    case RA_BYTE:
+    case RB_BYTE:
+    case RC_BYTE:
+    case RD_BYTE:
+    case RE_BYTE:
+    case STATUS: {
+      *reg = vm->memory[vm->stack_pointer++];
       break;
     }
-    case RA_TWO_BYTES: {
-      uint8_t right = vm->memory[vm->stack_pointer++];
-      uint8_t left = vm->memory[vm->stack_pointer++];
-
-      vm->register_a = u16_combine(left, right);
-      break;
-    }
-    case RB_BYTE: {
-      vm->register_b = vm->memory[++vm->stack_pointer];
-      break;
-    }
-    case RB_TWO_BYTES: {
-      uint8_t right = vm->memory[vm->stack_pointer++];
-      uint8_t left = vm->memory[vm->stack_pointer++];
-
-      vm->register_b = u16_combine(left, right);
-      break;
-    }
-    case RC_BYTE: {
-      vm->register_c = vm->memory[++vm->stack_pointer];
-      break;
-    }
-    case RC_TWO_BYTES: {
-      uint8_t right = vm->memory[vm->stack_pointer++];
-      uint8_t left = vm->memory[vm->stack_pointer++];
-
-      vm->register_c = u16_combine(left, right);
-      break;
-    }
-    case RD_BYTE: {
-      vm->register_d = vm->memory[++vm->stack_pointer];
-      break;
-    }
-    case RD_TWO_BYTES: {
-      uint8_t right = vm->memory[vm->stack_pointer++];
-      uint8_t left = vm->memory[vm->stack_pointer++];
-
-      vm->register_d = u16_combine(left, right);
-      break;
-    }
-    case RE_BYTE: {
-      vm->register_e = vm->memory[++vm->stack_pointer];
-      break;
-    }
-    case RE_TWO_BYTES: {
-      uint8_t right = vm->memory[vm->stack_pointer++];
-      uint8_t left = vm->memory[vm->stack_pointer++];
-
-      vm->register_e = u16_combine(left, right);
-      break;
-    }
-    case STACK_PTR: {
-      uint8_t right = vm->memory[vm->stack_pointer++];
-      uint8_t left = vm->memory[vm->stack_pointer++];
-
-      vm->stack_pointer = u16_combine(left, right);
-      break;
-    }
-    case BASE_PTR: {
-      uint8_t right = vm->memory[vm->stack_pointer++];
-      uint8_t left = vm->memory[vm->stack_pointer++];
-
-      vm->base_pointer = u16_combine(left, right);
-      break;
-    }
+    case RA_TWO_BYTES:
+    case RB_TWO_BYTES:
+    case RC_TWO_BYTES:
+    case RD_TWO_BYTES:
+    case RE_TWO_BYTES:
+    case STACK_PTR:
+    case BASE_PTR:
     case ACCUMULATOR: {
       uint8_t right = vm->memory[vm->stack_pointer++];
       uint8_t left = vm->memory[vm->stack_pointer++];
-
-      vm->accumulator = u16_combine(left, right);
-      break;
-    }
-    case STATUS: {
-      vm->status_register = vm->memory[vm->stack_pointer++];
-      break;
+      *reg = u16_combine(left, right);
     }
     }
     break;

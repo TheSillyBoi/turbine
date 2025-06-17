@@ -12,18 +12,28 @@ int main() {
 
   u16_split(ROM_DATA_START, &left, &right);
 
-#define TEXT_LENGTH 23
-  uint8_t text[] = {LDD,  RA_BYTE,          0x10,    LDD, RB_BYTE, 0x0,
-                    LDD,  RC_BYTE,          0x1,     SUB, RA_BYTE, RC_BYTE,
-                    MOVE, ACCUMULATOR,      RA_BYTE, CMP, RA_BYTE, RB_BYTE,
-                    JUMP, CMP_GREATER_THAN, 0x9,     0x0, HLT};
+#define TEXT_LENGTH 27
+  uint8_t text[] = {LDD,          RA_BYTE,
+                    0xff,         LDD,
+                    RB_BYTE,      0x0,
+                    LDD,          RC_BYTE,
+                    0x1,          SUB,
+                    RA_BYTE,      RC_BYTE,
+                    MOVE,         ACCUMULATOR,
+                    RA_BYTE,      PUSH,
+                    RA_TWO_BYTES, CMP,
+                    RA_BYTE,      RB_BYTE,
+                    JUMP,         CMP_GREATER_THAN,
+                    0x9,          0x0,
+                    POP,          RD_TWO_BYTES,
+                    HLT};
 
   init_text_vm(&vm, text, TEXT_LENGTH);
 
-  debug_print_vm(&vm);
+  // debug_print_vm(&vm);
   while (!vm.halted) {
     step_vm(&vm);
-    debug_print_vm(&vm);
+    // debug_print_vm(&vm);
   }
 
   delete_vm(&vm);
