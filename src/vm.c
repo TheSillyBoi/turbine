@@ -11,42 +11,25 @@
 
 VirtualMachine init_vm() {
   uint8_t *memory = malloc(sizeof(uint8_t) * MEMORY_SIZE);
-  Device *devices = malloc(sizeof(Device) * DEVICES_LENGTH);
 
   VirtualMachine vm = {0};
   vm.base_pointer = RAM_END;
   vm.stack_pointer = RAM_END;
+  vm.instruction_pointer = RAM_START;
   vm.halted = false;
   vm.memory = memory;
   vm.devices = devices;
-  vm.devices[0] = console;
-  vm.devices[1] = screen;
-
-  for (int i = 0; i < DEVICES_LENGTH; i++) {
-    if (vm.devices[i].init != NULL) {
-      vm.devices[i].init();
-    }
-  }
 
   return vm;
 }
 
 void delete_vm(VirtualMachine *vm) {
   free(vm->memory);
-  free(vm->devices);
 }
 
-void init_text_vm(VirtualMachine *vm, uint8_t *text, uint16_t size) {
-  assert(size < ROM_TEXT_END - ROM_TEXT_START + 1);
+void init_program_vm(VirtualMachine *vm, uint8_t *text, uint16_t size) {
   for (int i = 0; i < size; i++) {
-    vm->memory[ROM_TEXT_START + i] = text[i];
-  }
-}
-
-void init_data_vm(VirtualMachine *vm, uint8_t *data, uint16_t size) {
-  assert(size < ROM_DATA_END - ROM_DATA_START + 1);
-  for (int i = 0; i < size; i++) {
-    vm->memory[ROM_DATA_START + i] = data[i];
+    vm->memory[RAM_START + i] = text[i];
   }
 }
 
@@ -54,9 +37,11 @@ void step_vm(VirtualMachine *vm) {
   if (vm->halted) {
     return;
   }
+  for (uint8_t i = 0; i < DEVICES_LENGTH; i++) {
+    devices[i]->on_cycle(vm, devices[i]);
+  }
   switch (vm->memory[vm->instruction_pointer++]) {
   case LOAD: {
-    printf("LOAD\n");
     uint16_t *reg = NULL;
     reg_flag_parser(vm, &reg);
     switch (vm->memory[vm->instruction_pointer - 1]) {
@@ -91,7 +76,6 @@ void step_vm(VirtualMachine *vm) {
     break;
   }
   case DUMP: {
-    printf("DUMP\n");
     uint16_t *reg = NULL;
     reg_flag_parser(vm, &reg);
     switch (vm->memory[vm->instruction_pointer - 1]) {
@@ -128,7 +112,6 @@ void step_vm(VirtualMachine *vm) {
     break;
   }
   case MOVE: {
-    printf("MOVE\n");
     uint16_t *reg1 = NULL;
     uint16_t *reg2 = NULL;
 
@@ -140,7 +123,6 @@ void step_vm(VirtualMachine *vm) {
     break;
   }
   case LDD: {
-    printf("LDD\n");
     uint16_t *reg = NULL;
     reg_flag_parser(vm, &reg);
     switch (vm->memory[vm->instruction_pointer - 1]) {
@@ -170,7 +152,6 @@ void step_vm(VirtualMachine *vm) {
   }
   // left first, right last for push and reverse for pop
   case PUSH: {
-    printf("PUSH\n");
     uint16_t *reg = NULL;
     reg_flag_parser(vm, &reg);
     switch (vm->memory[vm->instruction_pointer - 1]) {
@@ -201,7 +182,6 @@ void step_vm(VirtualMachine *vm) {
     break;
   }
   case POP: {
-    printf("POP\n");
     uint16_t *reg = NULL;
     reg_flag_parser(vm, &reg);
     switch (vm->memory[vm->instruction_pointer - 1]) {
@@ -230,7 +210,6 @@ void step_vm(VirtualMachine *vm) {
     break;
   }
   case ADD: {
-    printf("ADD\n");
     uint16_t *reg1 = NULL;
     uint16_t *reg2 = NULL;
 
@@ -244,7 +223,6 @@ void step_vm(VirtualMachine *vm) {
     break;
   }
   case ADC: {
-    printf("ADC\n");
     uint16_t *reg1 = NULL;
     uint16_t *reg2 = NULL;
 
@@ -259,7 +237,6 @@ void step_vm(VirtualMachine *vm) {
     break;
   }
   case SUB: {
-    printf("SUB\n");
     uint16_t *reg1 = NULL;
     uint16_t *reg2 = NULL;
 
@@ -275,7 +252,6 @@ void step_vm(VirtualMachine *vm) {
   }
 
   case SBB: {
-    printf("SBB\n");
     uint16_t *reg1 = NULL;
     uint16_t *reg2 = NULL;
 
@@ -291,7 +267,6 @@ void step_vm(VirtualMachine *vm) {
     break;
   }
   case NOT: {
-    printf("NOT\n");
     uint16_t *reg1 = NULL;
     reg_flag_parser(vm, &reg1);
 
@@ -299,7 +274,6 @@ void step_vm(VirtualMachine *vm) {
     break;
   }
   case OR: {
-    printf("OR\n");
     uint16_t *reg1 = NULL;
     uint16_t *reg2 = NULL;
 
@@ -310,7 +284,6 @@ void step_vm(VirtualMachine *vm) {
     break;
   }
   case AND: {
-    printf("AND\n");
     uint16_t *reg1 = NULL;
     uint16_t *reg2 = NULL;
 
@@ -321,7 +294,6 @@ void step_vm(VirtualMachine *vm) {
     break;
   }
   case CMP: {
-    printf("CMP\n");
     uint16_t *reg1 = NULL;
     uint16_t *reg2 = NULL;
 
@@ -339,7 +311,6 @@ void step_vm(VirtualMachine *vm) {
     break;
   }
   case JUMP: {
-    printf("JUMP\n");
     uint8_t status = vm->memory[vm->instruction_pointer++];
     uint8_t left_memory_addr = vm->memory[vm->instruction_pointer++];
     uint8_t right_memory_addr = vm->memory[vm->instruction_pointer++];
@@ -350,30 +321,7 @@ void step_vm(VirtualMachine *vm) {
 
     break;
   }
-  case DIN: {
-    printf("DIN\n");
-    uint8_t device_id = vm->memory[vm->instruction_pointer++];
-    uint16_t *reg = NULL;
-    reg_flag_parser(vm, &reg);
-    if (device_id > 0 && device_id < DEVICES_LENGTH) {
-      if (vm->devices[device_id].in != NULL) {
-        vm->devices[device_id].in(*reg);
-      }
-    }
-    break;
-  }
-  case DOUT: {
-    printf("DOUT\n");
-    uint8_t device_id = vm->memory[vm->instruction_pointer++];
-    if (device_id > 0 && device_id < DEVICES_LENGTH) {
-      if (vm->devices[device_id].out != NULL) {
-        vm->accumulator = vm->devices[device_id].out();
-      }
-    }
-    break;
-  }
   case HLT: {
-    printf("HLT\n");
     vm->halted = true;
     break;
   }

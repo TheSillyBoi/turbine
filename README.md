@@ -24,9 +24,8 @@ Custom CPU Architecture and emulator for that architecture made for fun!
 
 ## Memory
 
-- `0x0000 - 0x0400` -> ROM(TEXT)
-- `0x0401 - 0x0800` -> ROM(DATA)
-- `0x0801 - 0xFFFF` -> RAM
+- `0x0 - 0x1`    -> Console
+- `0x2 - 0xFFFF` -> RAM
 
 ## Instructions
 
@@ -45,9 +44,7 @@ Custom CPU Architecture and emulator for that architecture made for fun!
 - `0xC`  -> `AND [reg flag] [reg flag]`
 - `0xD`  -> `CMP [reg flag] [reg flag]`
 - `0xE`  -> `JUMP [status flag] [mem addr]`
-- `0xF`  -> `DIN [device flag] [reg flag]`
-- `0x10` -> `DOUT [device flag] [reg flag]`
-- `0x11` -> `HLT`
+- `0xF`  -> `HLT`
 
 *`0x1` and `0x3` are the same as `0x0` and `0x2` respectively
 
