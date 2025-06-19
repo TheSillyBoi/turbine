@@ -41,7 +41,7 @@ void step_vm(VirtualMachine *vm) {
     return;
   }
   for (uint8_t i = 0; i < DEVICES_LENGTH; i++) {
-    devices[i]->on_cycle(vm, devices[i]);
+    devices[i]->on_cycle(vm);
   }
   switch (vm->memory[vm->instruction_pointer++]) {
   case LOAD: {

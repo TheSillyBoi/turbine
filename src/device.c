@@ -3,11 +3,11 @@
 #include <stdint.h>
 #include <stdio.h>
 
-void console_on_cycle(VirtualMachine *vm, Device* self) {
-  uint8_t data = vm->memory[console.start];
-  if (data != 0) {
-    printf("%c", vm->memory[self->start]);
-    vm->memory[console.start] = 0;
+void console_on_cycle(VirtualMachine *vm) {
+  uint8_t *data = &vm->memory[console.start];
+  if (*data != 0) {
+    printf("%c", *data);
+    *data = 0;
   }
 }
 

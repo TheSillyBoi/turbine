@@ -1,5 +1,3 @@
-#include "flags.h"
-#include "instructions.h"
 #include "vm.h"
 #include <stdint.h>
 #include <stdio.h>

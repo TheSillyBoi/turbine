@@ -13,7 +13,7 @@ typedef struct Device {
   uint16_t end;
   uint8_t prev_change_indic;
   // on each cpu cycle, this function gets ran
-  void (*on_cycle)(VirtualMachine *vm, Device *self);
+  void (*on_cycle)(VirtualMachine *vm);
 } Device;
 
 extern Device console;
