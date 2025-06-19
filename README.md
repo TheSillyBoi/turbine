@@ -12,7 +12,7 @@ You need GNU make and a C23 compiler installed. GCC and Clang work. Run `make re
 
 - 16-bit processor
 - Single-threaded
-- 0xffff bytes of memory
+- 0x10000 bytes of memory
 - Little-endian
 
 ## Registers
