@@ -14,8 +14,9 @@ typedef enum RegisterFlag {
   RE_TWO_BYTES = 0x9,
   STACK_PTR = 0xa,
   BASE_PTR = 0xb,
-  ACCUMULATOR = 0xc,
-  STATUS = 0xd
+  ACCUMULATOR_BYTE = 0xc,
+  ACCUMULATOR_TWO_BYTES = 0xd,
+  STATUS = 0xe
 } RegisterFlag;
 
 // typedef enum DeviceFlag {

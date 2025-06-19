@@ -58,10 +58,8 @@ for line in file:lines() do
 	for token in string.gmatch(line, "[^%s]+") do
 		if lookup[token] == nil then
 			table.insert(binary, tonumber(token))
-			print(string.format("%s: 0x%x", token, tonumber(token)))
 		else
 			table.insert(binary, tonumber(lookup[token]))
-			print(string.format("%s: 0x%x", token, tonumber(lookup[token])))
 		end
 	end
 end

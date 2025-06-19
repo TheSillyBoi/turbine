@@ -4,10 +4,10 @@
 #include <stdio.h>
 
 void console_on_cycle(VirtualMachine *vm, Device* self) {
-  uint8_t change_indicator = vm->memory[console.start];
-  if (change_indicator != self->prev_change_indic) {
-    console.prev_change_indic = change_indicator;
-    printf("%c", vm->memory[self->end]);
+  uint8_t data = vm->memory[console.start];
+  if (data != 0) {
+    printf("%c", vm->memory[self->start]);
+    vm->memory[console.start] = 0;
   }
 }
 
@@ -15,5 +15,5 @@ void console_on_cycle(VirtualMachine *vm, Device* self) {
 // will just cycle between 1 and 0 for true and false. if the first register
 // changes from last time, then the end register character will be printed as
 // ascii to standard output
-Device console = {.start = 0x0, .end = 0x1, .on_cycle = console_on_cycle};
+Device console = {.start = 0x0, .end = 0x0, .on_cycle = console_on_cycle};
 Device *devices[] = {&console};

@@ -29,11 +29,16 @@ int main(int argc, char *argv[]) {
   init_program_vm(&vm, file, file_size);
   free(file);
   file = NULL;
+  bool debug = getenv("DEBUG");
 
-  debug_print_vm(&vm);
+  if (debug) {
+    debug_print_vm(&vm);
+  }
   while (!vm.halted) {
     step_vm(&vm);
-    debug_print_vm(&vm);
+    if (debug) {
+      debug_print_vm(&vm);
+    }
   }
 
   delete_vm(&vm);

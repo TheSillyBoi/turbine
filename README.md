@@ -46,24 +46,25 @@ Custom CPU Architecture and emulator for that architecture made for fun!
 - `0xE`  -> `JUMP [status flag] [mem addr]`
 - `0xF`  -> `HLT`
 
-*`0x1` and `0x3` are the same as `0x0` and `0x2` respectively
+*Two byte and one byte instructions do the same for this.
 
 ### Register Flags
 
-- `0x0` -> `RA_BYTE`      -> 1 byte to register A
-- `0x1` -> `RA_TWO_BYTES` -> 2 bytes to register A
-- `0x2` -> `RB_BYTE`      -> 1 byte to register B
-- `0x3` -> `RB_TWO_BYTES` -> 2 bytes to register B
-- `0x4` -> `RC_BYTE`      -> 1 byte to register C
-- `0x5` -> `RC_TWO_BYTES` -> 2 bytes to register C
-- `0x6` -> `RD_BYTE`      -> 1 byte to register D
-- `0x7` -> `RD_TWO_BYTES` -> 2 bytes to register D
-- `0x8` -> `RE_BYTE`      -> 1 byte to register E
-- `0x9` -> `RE_TWO_BYTES` -> 2 bytes to register E
-- `0xa` -> `STACK_PTR`    -> 2 bytes to stack pointer
-- `0xb` -> `BASE_PTR`     -> 2 bytes to base pointer
-- `0xc` -> `ACCUMULATOR`  -> 1 byte to accumulator
-- `0xd` -> `STATUS`       -> Status flag(1 byte) to status register
+- `0x0` -> `RA_BYTE`               -> 1 byte to register A
+- `0x1` -> `RA_TWO_BYTES`          -> 2 bytes to register A
+- `0x2` -> `RB_BYTE`               -> 1 byte to register B
+- `0x3` -> `RB_TWO_BYTES`          -> 2 bytes to register B
+- `0x4` -> `RC_BYTE`               -> 1 byte to register C
+- `0x5` -> `RC_TWO_BYTES`          -> 2 bytes to register C
+- `0x6` -> `RD_BYTE`               -> 1 byte to register D
+- `0x7` -> `RD_TWO_BYTES`          -> 2 bytes to register D
+- `0x8` -> `RE_BYTE`               -> 1 byte to register E
+- `0x9` -> `RE_TWO_BYTES`          -> 2 bytes to register E
+- `0xa` -> `STACK_PTR`             -> 2 bytes to stack pointer
+- `0xb` -> `BASE_PTR`              -> 2 bytes to base pointer
+- `0xc` -> `ACCUMULATOR_BYTE`      -> 1 byte to accumulator
+- `0xd` -> `ACCUMULATOR_TWO_BYTE`  -> 2 byte to accumulator
+- `0xe` -> `STATUS`                -> Status flag(1 byte) to status register
 
 ### Status Flags
 

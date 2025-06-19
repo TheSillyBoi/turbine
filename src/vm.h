@@ -7,7 +7,7 @@
 #include <stdint.h>
 
 #define MEMORY_SIZE 0xFFFF
-#define RAM_START 0x2
+#define RAM_START 0x1
 #define RAM_END 0xFFFE
 
 typedef struct VirtualMachine {

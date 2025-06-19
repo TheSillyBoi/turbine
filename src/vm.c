@@ -51,6 +51,7 @@ void step_vm(VirtualMachine *vm) {
     case RC_BYTE:
     case RD_BYTE:
     case RE_BYTE:
+    case ACCUMULATOR_BYTE:
     case STATUS: {
       uint8_t left = vm->memory[vm->instruction_pointer++];
       uint8_t right = vm->memory[vm->instruction_pointer++];
@@ -64,7 +65,7 @@ void step_vm(VirtualMachine *vm) {
     case RE_TWO_BYTES:
     case STACK_PTR:
     case BASE_PTR:
-    case ACCUMULATOR: {
+    case ACCUMULATOR_TWO_BYTES: {
       uint8_t left = vm->memory[vm->instruction_pointer++];
       uint8_t right = vm->memory[vm->instruction_pointer++];
       uint16_t memory = u16_combine(left, right);
@@ -85,6 +86,7 @@ void step_vm(VirtualMachine *vm) {
     case RC_BYTE:
     case RD_BYTE:
     case RE_BYTE:
+    case ACCUMULATOR_BYTE:
     case STATUS: {
       uint8_t left = vm->memory[vm->instruction_pointer++];
       uint8_t right = vm->memory[vm->instruction_pointer++];
@@ -98,7 +100,7 @@ void step_vm(VirtualMachine *vm) {
     case RE_TWO_BYTES:
     case STACK_PTR:
     case BASE_PTR:
-    case ACCUMULATOR: {
+    case ACCUMULATOR_TWO_BYTES: {
       uint8_t left_mem = vm->memory[vm->instruction_pointer++];
       uint8_t right_mem = vm->memory[vm->instruction_pointer++];
       uint8_t memory_addr = u16_combine(left_mem, right_mem);
@@ -132,6 +134,7 @@ void step_vm(VirtualMachine *vm) {
     case RC_BYTE:
     case RD_BYTE:
     case RE_BYTE:
+    case ACCUMULATOR_BYTE:
     case STATUS: {
       *reg = vm->memory[vm->instruction_pointer++];
       break;
@@ -143,7 +146,7 @@ void step_vm(VirtualMachine *vm) {
     case RE_TWO_BYTES:
     case STACK_PTR:
     case BASE_PTR:
-    case ACCUMULATOR: {
+    case ACCUMULATOR_TWO_BYTES: {
       uint8_t left = vm->memory[vm->instruction_pointer++];
       uint8_t right = vm->memory[vm->instruction_pointer++];
       *reg = u16_combine(left, right);
@@ -161,6 +164,7 @@ void step_vm(VirtualMachine *vm) {
     case RC_BYTE:
     case RD_BYTE:
     case RE_BYTE:
+    case ACCUMULATOR_BYTE:
     case STATUS: {
       vm->memory[vm->stack_pointer--] = *reg;
       break;
@@ -172,7 +176,7 @@ void step_vm(VirtualMachine *vm) {
     case RE_TWO_BYTES:
     case STACK_PTR:
     case BASE_PTR:
-    case ACCUMULATOR: {
+    case ACCUMULATOR_TWO_BYTES: {
       uint8_t left = 0;
       uint8_t right = 0;
       u16_split(vm->stack_pointer, &left, &right);
@@ -191,6 +195,7 @@ void step_vm(VirtualMachine *vm) {
     case RC_BYTE:
     case RD_BYTE:
     case RE_BYTE:
+    case ACCUMULATOR_BYTE:
     case STATUS: {
       *reg = vm->memory[++vm->stack_pointer];
       break;
@@ -202,7 +207,7 @@ void step_vm(VirtualMachine *vm) {
     case RE_TWO_BYTES:
     case STACK_PTR:
     case BASE_PTR:
-    case ACCUMULATOR: {
+    case ACCUMULATOR_TWO_BYTES: {
       uint8_t right = vm->memory[++vm->stack_pointer];
       uint8_t left = vm->memory[++vm->stack_pointer];
       *reg = u16_combine(left, right);
@@ -364,7 +369,8 @@ void reg_flag_parser(VirtualMachine *vm, uint16_t **ptr) {
     *ptr = &vm->base_pointer;
     break;
   }
-  case ACCUMULATOR: {
+  case ACCUMULATOR_BYTE:
+  case ACCUMULATOR_TWO_BYTES: {
     *ptr = &vm->accumulator;
     break;
   }
@@ -376,7 +382,7 @@ void reg_flag_parser(VirtualMachine *vm, uint16_t **ptr) {
 }
 
 void debug_print_vm(VirtualMachine *vm) {
-  printf("Register A: 0x%x\n", vm->register_a);
+  printf("\nRegister A: 0x%x\n", vm->register_a);
   printf("Register B: 0x%x\n", vm->register_b);
   printf("Register C: 0x%x\n", vm->register_c);
   printf("Register D: 0x%x\n", vm->register_d);
