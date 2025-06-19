@@ -6,7 +6,7 @@ Custom CPU Architecture and emulator for that architecture made for fun!
 
 ## Build
 
-You need GNU make and a C23 compiler installed. GCC and Clang work. Run `make release` and the. compiled binary should be in the build folder.
+You need GNU make and a C23 compiler installed. GCC and Clang work. Run `make release` and the compiled binary should be in the build folder.
 
 ## Details
 
