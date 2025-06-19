@@ -30,8 +30,8 @@ You need GNU make and a C23 compiler installed. GCC and Clang work. Run `make re
 
 ## Memory
 
-- `0x0 - 0x1`    -> Console
-- `0x2 - 0xFFFF` -> RAM
+- `0x0`          -> Console
+- `0x1 - 0xFFFF` -> RAM
 
 ## Instructions
 
