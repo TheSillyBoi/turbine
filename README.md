@@ -50,6 +50,7 @@ Custom CPU Architecture and emulator for that architecture made for fun!
 
 *Two byte and one byte instructions do the same for this.
 This instruction also moves from register 1 to register 2
+
 *\*These instructions save the result to the accumulator
 
 ### Important Details
