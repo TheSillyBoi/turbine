@@ -1,5 +1,7 @@
 # Turbine
 
+[![asciicast](https://asciinema.org/a/bkevNpgd5Q4aMDVD2sc0ZMEN4.svg)](https://asciinema.org/a/bkevNpgd5Q4aMDVD2sc0ZMEN4)
+
 Custom CPU Architecture and emulator for that architecture made for fun!
 
 ## Details
