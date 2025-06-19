@@ -66,6 +66,7 @@ in little-endian order. Messing this up can mean that a command can be
 interpreted as data and stuff gets messed up.
 - Please don't try to manually bit fiddle to build binaries! Use the assembly script
 I wrote in lua.
+- Calling convention: Push arguments to stack
 
 ### Register Flags
 
