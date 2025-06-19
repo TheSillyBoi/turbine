@@ -37,18 +37,30 @@ Custom CPU Architecture and emulator for that architecture made for fun!
 - `0x3`  -> `LDD [reg flag] [data]`
 - `0x4`  -> `PUSH [reg flag]`
 - `0x5`  -> `POP [reg flag]`
-- `0x6`  -> `ADD [reg flag] [reg flag]`
-- `0x7`  -> `ADC [reg flag] [reg flag]`
-- `0x8`  -> `SUB [reg flag] [reg flag]`
-- `0x9`  -> `SBB [reg flag] [reg flag]`
-- `0xA`  -> `NOT [reg flag]`
-- `0xB`  -> `OR [reg flag] [reg flag]`
-- `0xC`  -> `AND [reg flag] [reg flag]`
+- `0x6`  -> `ADD [reg flag] [reg flag]`*\*
+- `0x7`  -> `ADC [reg flag] [reg flag]`*\*
+- `0x8`  -> `SUB [reg flag] [reg flag]`*\*
+- `0x9`  -> `SBB [reg flag] [reg flag]`*\*
+- `0xA`  -> `NOT [reg flag]`*\*
+- `0xB`  -> `OR [reg flag] [reg flag]`*\*
+- `0xC`  -> `AND [reg flag] [reg flag]`*\*
 - `0xD`  -> `CMP [reg flag] [reg flag]`
 - `0xE`  -> `JUMP [status flag] [mem addr]`
 - `0xF`  -> `HLT`
 
 *Two byte and one byte instructions do the same for this.
+This instruction also moves from register 1 to register 2
+*\*These instructions save the result to the accumulator
+
+### Important Details
+
+- When passing in data with a command that uses a register flag,
+be wary of the amount of bytes that you type in.
+- If it has `TWO_BYTES` attached to it, type in two different bytes
+in little-endian order. Messing this up can mean that a command can be
+interpreted as data and stuff gets messed up.
+- Please don't try to manually bit fiddle to build binaries! Use the assembly script
+I wrote in lua.
 
 ### Register Flags
 
