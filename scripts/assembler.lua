@@ -42,7 +42,7 @@ local lookup = {
 }
 
 if arg[1] == nil or arg[2] == nil then
-	print("Usage: assembler [file]")
+	print("Usage: assembler [input file] [output file]")
 	return 1
 end
 
