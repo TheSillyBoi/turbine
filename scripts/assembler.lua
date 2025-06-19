@@ -28,7 +28,8 @@ local lookup = {
 	RE_TWO_BYTES = 0x9,
 	STACK_PTR = 0xa,
 	BASE_PTR = 0xb,
-	ACCUMULATOR = 0xc,
+	ACCUMULATOR_BYTE = 0xc,
+	ACCUMULATOR_TWO_BYTES = 0xd,
 	STATUS = 0xd,
 
 	CMP_EQUAL_TO = 0x0,
@@ -58,8 +59,10 @@ for line in file:lines() do
 	for token in string.gmatch(line, "[^%s]+") do
 		if lookup[token] == nil then
 			table.insert(binary, tonumber(token))
+			print(string.format("%s: 0x%x", token, tonumber(token)))
 		else
 			table.insert(binary, tonumber(lookup[token]))
+			print(string.format("%s: 0x%x", token, tonumber(lookup[token])))
 		end
 	end
 end
@@ -81,3 +84,4 @@ local compiled = io.open(arg[2], "wb")
 if compiled ~= nil then
 	compiled.write(compiled, write_format(table.unpack(binary)))
 end
+print("Assembled!")

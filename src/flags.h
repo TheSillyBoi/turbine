@@ -19,11 +19,6 @@ typedef enum RegisterFlag {
   STATUS = 0xe
 } RegisterFlag;
 
-// typedef enum DeviceFlag {
-//   CONSOLE = 0x0,
-//   SCREEN = 0x1,
-// } DeviceFlag;
-
 typedef enum StatusFlag {
   CMP_EQUAL_TO = 0x0,
   CMP_GREATER_THAN = 0x1,

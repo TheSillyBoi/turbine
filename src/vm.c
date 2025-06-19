@@ -8,11 +8,13 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 VirtualMachine init_vm() {
   uint8_t *memory = malloc(sizeof(uint8_t) * MEMORY_SIZE);
 
-  VirtualMachine vm = {0};
+  VirtualMachine vm;
+  memset(&vm, 0, sizeof(vm));
   vm.base_pointer = RAM_END;
   vm.stack_pointer = RAM_END;
   vm.instruction_pointer = RAM_START;
@@ -378,6 +380,10 @@ void reg_flag_parser(VirtualMachine *vm, uint16_t **ptr) {
     *ptr = (uint16_t *)&vm->status_register;
     break;
   }
+  default:
+    printf("There was an error! Check your instructions!");
+    vm->halted = true;
+    break;
   }
 }
 
