@@ -6,9 +6,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define MEMORY_SIZE 0xFFFF
+#define MEMORY_SIZE 0x1000
 #define RAM_START 0x1
-#define RAM_END 0xFFFE
+#define RAM_END 0xFFFF
 
 typedef struct VirtualMachine {
   uint16_t register_a;
