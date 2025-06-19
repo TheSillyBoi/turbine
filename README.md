@@ -65,11 +65,6 @@ Custom CPU Architecture and emulator for that architecture made for fun!
 - `0xc` -> `ACCUMULATOR`  -> 1 byte to accumulator
 - `0xd` -> `STATUS`       -> Status flag(1 byte) to status register
 
-### Device Flags
-
-- `0x0` -> Console
-- `0x1` -> Screen
-
 ### Status Flags
 
 - `0x0` -> `CMP_EQUAL_TO`     -> When `CMP` finds both registers equal to each other
