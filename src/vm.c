@@ -25,6 +25,7 @@ VirtualMachine init_vm() {
 
 void delete_vm(VirtualMachine *vm) {
   free(vm->memory);
+  vm->memory = NULL;
 }
 
 void init_program_vm(VirtualMachine *vm, uint8_t *text, uint16_t size) {
@@ -191,7 +192,7 @@ void step_vm(VirtualMachine *vm) {
     case RD_BYTE:
     case RE_BYTE:
     case STATUS: {
-      *reg = vm->memory[vm->stack_pointer++];
+      *reg = vm->memory[++vm->stack_pointer];
       break;
     }
     case RA_TWO_BYTES:
@@ -202,8 +203,8 @@ void step_vm(VirtualMachine *vm) {
     case STACK_PTR:
     case BASE_PTR:
     case ACCUMULATOR: {
-      uint8_t right = vm->memory[vm->stack_pointer++];
-      uint8_t left = vm->memory[vm->stack_pointer++];
+      uint8_t right = vm->memory[++vm->stack_pointer];
+      uint8_t left = vm->memory[++vm->stack_pointer];
       *reg = u16_combine(left, right);
     }
     }

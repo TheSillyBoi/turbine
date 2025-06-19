@@ -6,7 +6,7 @@ Custom CPU Architecture and emulator for that architecture made for fun!
 
 - 16-bit processor
 - Single-threaded
-- 0xfff bytes of memory
+- 0xffff bytes of memory
 - Little-endian
 
 ## Registers
