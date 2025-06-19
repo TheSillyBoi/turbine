@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
 
   VirtualMachine vm = init_vm();
 
-  init_program_vm(&vm, file, sizeof(file));
+  init_program_vm(&vm, file, file_size);
   free(file);
   file = NULL;
 
