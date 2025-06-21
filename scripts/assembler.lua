@@ -1,3 +1,4 @@
+#!/usr/bin/lua
 local lookup = {
 	LOAD = 0x0,
 	DUMP = 0x1,
