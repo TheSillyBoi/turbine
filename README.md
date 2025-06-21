@@ -78,6 +78,7 @@ interpreted as data and stuff gets messed up.
 - Please don't try to manually bit fiddle to build binaries! Use the assembly script
 I wrote in lua.
 - Calling convention: Push arguments to stack
+- Turbine doesn't take in the .turbine files! It takes in the .asm files which you get by first assembling the files using the script in ./scripts/assembler.lua
 
 ### Register Flags
 
