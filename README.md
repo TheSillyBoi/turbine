@@ -8,6 +8,17 @@ Custom CPU Architecture and emulator for that architecture made for fun!
 
 You need GNU make and a compiler that supports C11 at minimum installed. GCC and Clang work. Run `make release` and the compiled binary should be in the build folder.
 
+## Usage
+
+```
+$ # create a program
+$ vi my-program.turbine
+$ # assemble it
+$ ./scripts/assembler.lua my-program.turbine my-program.asm
+$ # run it
+$ ./build/turbine my-program.asm
+```
+
 ## Details
 
 - 16-bit processor
