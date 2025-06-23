@@ -6,7 +6,7 @@ Custom CPU Architecture and emulator for that architecture made for fun!
 
 ## Build
 
-You need GNU make and a compiler that supports C11 at minimum installed. GCC and Clang work. Run `make release` and the compiled binary should be in the build folder.
+You need GNU make and a compiler that supports C11 at minimum installed. GCC and Clang work. Run `make release` and the compiled binary should be in the build folder. In addition, you want lua installed to use the assembler script.
 
 ## Usage
 
