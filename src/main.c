@@ -15,12 +15,14 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
-  fseek(fp, 0L, SEEK_END);
+  if (fseek(fp, 0L, SEEK_END) != 0) {
+    fprintf(stderr, "Failed to seek to end of file");
+  }
   size_t file_size = ftell(fp);
   rewind(fp);
 
   uint8_t *file = malloc(file_size * sizeof(uint8_t));
-  fread(file, file_size, 1, fp);
+  (void) fread(file, file_size, 1, fp);
 
   VirtualMachine vm = init_vm();
 
