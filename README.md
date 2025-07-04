@@ -1,5 +1,13 @@
 # Turbine
 
+<div align="center">
+  <a href="https://shipwrecked.hackclub.com/?t=ghrm" target="_blank">
+    <img src="https://hc-cdn.hel1.your-objectstorage.com/s/v3/739361f1d440b17fc9e2f74e49fc185d86cbec14_badge.png" 
+         alt="This project is part of Shipwrecked, the world's first hackathon on an island!" 
+         style="width: 35%;">
+  </a>
+</div>
+
 [![asciicast](https://asciinema.org/a/bkevNpgd5Q4aMDVD2sc0ZMEN4.svg)](https://asciinema.org/a/bkevNpgd5Q4aMDVD2sc0ZMEN4)
 
 Custom CPU Architecture and emulator for that architecture made for fun!
